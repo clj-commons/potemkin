@@ -1,0 +1,4 @@
+#!/bin/sh
+
+lein jar && lein pom && scp pom.xml potemkin*.jar clojars@clojars.org: && git push
+lein autodoc && cd autodoc && git add .  && git add -u && git commit -m "update documentation" && git push origin gh-pages && cd ..
