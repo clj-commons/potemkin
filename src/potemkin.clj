@@ -6,16 +6,16 @@
 ;;   the terms of this license.
 ;;   You must not remove this notice, or any other, from this software.
 
-(ns potemkin)
+(ns potemkin
+  (:require
+    [potemkin.namespace :as namespace]
+    [potemkin.data :as data]))
 
-(defmacro import-fn 
-  "Given a function in another namespace, defines a function by
-   the same name in the current namespace.  Argument lists and
-   doc-strings are preserved."
-  [sym]
-  (let [m (meta (eval sym))
-        m (meta (intern (:ns m) (:name m)))
-        n (:name m)
-        arglists (:arglists m)
-        doc (:doc m)]
-    (list `def (with-meta n {:doc doc :arglists (list 'quote arglists)}) (eval sym))))
+(namespace/import-macro #'namespace/import-macro) ;; totally meta
+(import-macro #'namespace/import-fn)
+
+(import-macro #'data/def-custom-map)
+
+
+
+
