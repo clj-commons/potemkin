@@ -9,12 +9,12 @@
 (ns potemkin
   (:require
     [potemkin.namespace :as namespace]
-    [potemkin.data :as data]))
+    [potemkin.map :as map]))
 
 (namespace/import-macro #'namespace/import-macro) ;; totally meta
 (import-macro #'namespace/import-fn)
 
-(import-macro #'data/def-custom-map)
+(import-macro #'map/def-custom-map)
 
 
 

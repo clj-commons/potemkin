@@ -18,9 +18,11 @@
         arglists (:arglists m)
         doc (:doc m)]
     `(do
-       (def ~(with-meta n {:doc doc :arglists (list 'quote arglists)})
+       (def ~n
          ~(eval sym))
        (alter-meta! ~(list 'var n) assoc
+         :doc ~doc
+         :arglists '~arglists
          :file ~(:file m)
          :line ~(:line m))
        ~(list 'var n))))
@@ -37,10 +39,12 @@
         doc (:doc m)
         args-sym (gensym "args")]
     `(do
-       (defmacro ~(with-meta n {:doc doc :arglists (list 'quote arglists)})
+       (defmacro ~n
          [~'& ~args-sym]
          (list* ~sym ~args-sym))
        (alter-meta! ~(list 'var n) assoc
+         :arglists '~arglists
+         :doc ~doc
          :file ~(:file m)
          :line ~(:line m))
        ~(list 'var n))))
