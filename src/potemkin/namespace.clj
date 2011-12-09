@@ -17,15 +17,15 @@
         n (:name m)
         arglists (:arglists m)
         doc (:doc m)]
-    `(do
-       (def ~n
-         ~(eval sym))
+    #_`(do
+       (def ~n ~(ns-resolve (:ns m) (:name m)))
        (alter-meta! ~(list 'var n) assoc
          :doc ~doc
-         :arglists '~arglists
+         :arglists ~(list 'quote arglists)
          :file ~(:file m)
          :line ~(:line m))
-       ~(list 'var n))))
+       ~(list 'var n))
+     (list `def (with-meta n {:doc doc :arglists (list 'quote arglists) :file (:file m) :line (:line m)}) (eval sym))))
 
 (defmacro import-macro
   "Given a macro in another namespace, defines a macro with the same name in the
@@ -39,11 +39,10 @@
         doc (:doc m)
         args-sym (gensym "args")]
     `(do
-       (defmacro ~n
+       (defmacro ~(with-meta n {:arglists arglists})
          [~'& ~args-sym]
          (list* ~sym ~args-sym))
        (alter-meta! ~(list 'var n) assoc
-         :arglists '~arglists
          :doc ~doc
          :file ~(:file m)
          :line ~(:line m))
