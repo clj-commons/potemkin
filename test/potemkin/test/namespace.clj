@@ -15,11 +15,11 @@
     [clojure.string :as str]
     [potemkin.test.protocol :as p]))
 
-(import-macro #'repl/source)
-(import-macro #'repl/doc)
-(import-fn #'repl/find-doc)
-(import-fn #'p/multi-arity)
-(import-fn #'p/protocol-function)
+(import-macro repl/source)
+(import-macro repl/doc)
+(import-fn repl/find-doc)
+(import-fn p/multi-arity)
+(import-fn p/protocol-function)
 
 (defn drop-lines [n s]
   (->> s str/split-lines (drop n) (interpose "\n") (apply str)))
@@ -28,9 +28,7 @@
   `(= ~@(map (fn [x] `(with-out-str ~x)) args)))
 
 (defmacro rest-out= [& args]
-  `(do
-     ;;(do ~@(map (fn [x] `(println (with-out-str ~x))) args))
-     (= ~@(map (fn [x] `(drop-lines 2 (with-out-str ~x))) args))))
+  `(= ~@(map (fn [x] `(drop-lines 2 (with-out-str ~x))) args)))
 
 (deftest test-import-macro
   (is (out= (source repl/source) (source source)))
@@ -41,7 +39,6 @@
   (is (rest-out= (doc repl/find-doc) (doc find-doc)))
   (is (out= (source p/multi-arity) (source multi-arity)))
   (is (rest-out= (doc p/multi-arity) (doc multi-arity)))
-  (is (rest-out= (doc p/protocol-function) (doc protocol-function)))
-  )
+  (is (rest-out= (doc p/protocol-function) (doc protocol-function))))
 
 

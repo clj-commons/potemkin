@@ -11,10 +11,10 @@
     [potemkin.namespace :as namespace]
     [potemkin.map :as map]))
 
-(namespace/import-macro #'namespace/import-macro) ;; totally meta
-(import-macro #'namespace/import-fn)
+(namespace/import-macro namespace/import-macro) ;; totally meta
+(import-macro namespace/import-fn)
 
-(import-macro #'map/def-custom-map)
+(import-macro map/def-custom-map)
 
 
 
