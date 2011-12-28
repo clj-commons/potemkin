@@ -1,3 +1,1 @@
 Potemkin is a collection of utility functions that help manage code complexity in larger projects.  
-
-Currently, it only has one function, @import-fn@.  Passing a function from another namespace into @import-fn@ will cause a duplicate function to be declared within the current namespace.  This can be useful for resolving circular dependencies, or for creating a namespace which is a union of many sub-namespaces.
