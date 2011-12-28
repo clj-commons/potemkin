@@ -9,17 +9,16 @@
 (ns potemkin.test.namespace
   (:use
     potemkin
-    clojure.test)
+    clojure.test
+    clojure.repl)
   (:require
     [clojure.repl :as repl]
     [clojure.string :as str]
-    [potemkin.test.protocol :as p]))
+    [potemkin.test.imports :as i]))
 
-(import-macro repl/source)
-(import-macro repl/doc)
-(import-fn repl/find-doc)
-(import-fn p/multi-arity)
-(import-fn p/protocol-function)
+(import-macro i/multi-arity-macro)
+(import-fn i/multi-arity-fn)
+(import-fn i/protocol-function)
 
 (defn drop-lines [n s]
   (->> s str/split-lines (drop n) (interpose "\n") (apply str)))
@@ -31,14 +30,12 @@
   `(= ~@(map (fn [x] `(drop-lines 2 (with-out-str ~x))) args)))
 
 (deftest test-import-macro
-  (is (out= (source repl/source) (source source)))
-  (is (rest-out= (doc repl/doc) (doc doc))))
+  (is (out= (source i/multi-arity-macro) (source multi-arity-macro)))
+  (is (rest-out= (doc i/multi-arity-macro) (doc multi-arity-macro))))
 
 (deftest test-import-fn
-  (is (out= (source repl/find-doc) (source find-doc)))
-  (is (rest-out= (doc repl/find-doc) (doc find-doc)))
-  (is (out= (source p/multi-arity) (source multi-arity)))
-  (is (rest-out= (doc p/multi-arity) (doc multi-arity)))
-  (is (rest-out= (doc p/protocol-function) (doc protocol-function))))
+  (is (out= (source i/multi-arity-fn) (source multi-arity-fn)))
+  (is (rest-out= (doc i/multi-arity-fn) (doc multi-arity-fn)))
+  (is (rest-out= (doc i/protocol-function) (doc protocol-function))))
 
 
