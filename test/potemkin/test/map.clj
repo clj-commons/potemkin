@@ -9,7 +9,7 @@
 (ns potemkin.test.map
   (:use
     [clojure test]
-    [potemkin map]))
+    [potemkin]))
 
 (def-custom-map SimpleMap)
 
@@ -31,7 +31,9 @@
     (is (= 1 (get m :a)))
     (is (= 2 (get m :b 2)))
     (is (= 1 (:a m)))
-    (is (= 1 (m :a))))
+    (is (= 1 (m :a)))
+    (is (= [:a] (keys m)))
+    (is (= [[:a 1]] (seq m))))
   (let [m (-> m (assoc :a 1) (dissoc :a))]
     (is (not (contains? m :a))))
   (let [s (-> m (assoc :a 1) seq)]
