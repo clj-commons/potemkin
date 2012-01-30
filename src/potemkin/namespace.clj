@@ -20,6 +20,8 @@
         arglists (:arglists m)
         doc (:doc m)
         protocol (:protocol m)]
+    (when-not vr
+      (throw (IllegalArgumentException. (str "Don't recognize " sym))))
     `(do
        (def ~(with-meta n {:protocol protocol}) ~sym)
        (alter-meta! (var ~n) assoc
@@ -39,6 +41,8 @@
         nspace (:ns m)
         arglists (:arglists m)
         doc (:doc m)]
+    (when-not vr
+      (throw (IllegalArgumentException. (str "Don't recognize " sym))))
     `(do
        (def ~n ~(resolve sym))
        (alter-meta! (var ~n) assoc
