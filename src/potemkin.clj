@@ -10,14 +10,14 @@
   (:require
     [potemkin.namespace :as namespace]
     [potemkin.map :as map]
-    [potemkin.macro :as macro]))
+    [potemkin.macros :as macros]))
 
 (namespace/import-macro namespace/import-macro) ;; totally meta
 (import-macro namespace/import-fn)
 
 (import-macro map/def-custom-map)
 
-(import-fn macro/unify-gensyms)
+(import-fn macros/unify-gensyms)
 
 
 
