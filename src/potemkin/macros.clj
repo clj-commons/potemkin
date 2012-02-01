@@ -6,19 +6,23 @@
 ;;   the terms of this license.
 ;;   You must not remove this notice, or any other, from this software.
 
-(ns potemkin
-  (:require
-    [potemkin.namespace :as namespace]
-    [potemkin.map :as map]
-    [potemkin.macro :as macro]))
+(ns potemkin.macros
+  (:use [clojure walk]))
 
-(namespace/import-macro namespace/import-macro) ;; totally meta
-(import-macro namespace/import-fn)
+(def gensym-regex #"([a-zA-Z\-]+)__\d+__auto__$")
 
-(import-macro map/def-custom-map)
+(defn gensym? [s]
+  (and
+    (symbol? s)
+    (re-find gensym-regex (str s))))
 
-(import-fn macro/unify-gensyms)
+(defn un-gensym [s]
+  (second (re-find gensym-regex (str s))))
 
-
-
-
+(defn unify-gensyms [body]
+  (let [gensym* (memoize gensym)]
+    (postwalk
+      #(if (gensym? %)
+         (symbol (str (gensym* (str (un-gensym %) "__")) "__auto__"))
+         %)
+      body)))
