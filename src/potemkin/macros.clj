@@ -9,7 +9,7 @@
 (ns potemkin.macros
   (:use [clojure walk]))
 
-(def gensym-regex #"([a-zA-Z\-]+)__\d+__auto__$")
+(def gensym-regex #"([a-zA-Z\-]+)#__\d+__auto__$")
 
 (defn gensym? [s]
   (and
@@ -19,7 +19,10 @@
 (defn un-gensym [s]
   (second (re-find gensym-regex (str s))))
 
-(defn unify-gensyms [body]
+(defn unify-gensyms
+  "All gensyms defined using two hash symbols are unified to the same
+   value, even if they were defined within different syntax-quote scopes."
+  [body]
   (let [gensym* (memoize gensym)]
     (postwalk
       #(if (gensym? %)
