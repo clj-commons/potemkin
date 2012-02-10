@@ -29,3 +29,24 @@
          (symbol (str (gensym* (str (un-gensym %) "__")) "__auto__"))
          %)
       body)))
+
+(defn transform-defn-bodies
+  "Takes a (defn ...) form, and transform the bodies. The transform function is
+   passed the arglist, the function metadata, and the function body."
+  [f form]
+  (let [form (macroexpand form)
+        fn-form (->> form (drop 2) first)
+        fn-form (if (= ".withMeta" (str (first fn-form)))
+                  (second fn-form)
+                  fn-form)
+        fn-form (macroexpand fn-form)
+        fn-name (second form)
+        arity-forms (->> fn-form (drop-while symbol?))
+        arity-forms (map
+                      (fn [arity-form]
+                        (let [args (first arity-form)]
+                          `(~args ~@(f args (rest arity-form)))))
+                      arity-forms)]
+    `(~(first form)
+      ~(second form)
+      (fn* ~@arity-forms))))

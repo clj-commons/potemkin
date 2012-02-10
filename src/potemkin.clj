@@ -18,6 +18,7 @@
 (import-macro map/def-custom-map)
 
 (import-fn macros/unify-gensyms)
+(import-fn macros/transform-defn-bodies)
 
 
 
