@@ -1,1 +1,27 @@
-Potemkin is a collection of utility functions that help manage code complexity in larger projects.  
+Potemkin is a collection of functions for reorganizing the structure of namespaces and code.  It's used in "Lamina":https://github.com/ztellman/lamina, "Aleph":https://github.com/ztellman/aleph, and "Gloss":https://github.com/ztellman/gloss.
+
+In fact, that's probably why you're reading this.  You saw an `import-fn` or `import-macro` while browsing the source of one of those libraries, and your journey of discovery has brought you here.  Welcome.
+
+Typically this is where I'd document what the library does, but that's pretty well covered by the doc-strings.  Instead, given the surprising amount of criticism that's been leveled at this small and unassuming library, this README is dedicated to:
+
+h2. An Apologia for Potemkin
+
+Clojure's namespaces conflate how you implement your code and how it's consumed by other code.  This isn't always a bad thing, but in practice this means that large projects either have surprisingly large source files (e.g. clojure.core) or a surprising number of namespaces that have to all be used in concert to accomplish complex tasks (e.g. Ring).
+
+The former approach places an onus on the creator of the library; the various orthogonal pieces of his library all coexist, which can make it difficult to keep everything straight.  The latter approach places an onus on the consumers of the library, forcing them to remember exactly what functionality resides where before they can actually use it.
+
+`import-fn` and `import-macro` decouple the structure of the code from the structure of the API, allowing the library creator to structure the code however he likes, without necessarily requiring that the consumers have the same intimate understanding of that structure.
+
+As someone who spends a fair amount of time worrying both about the structure of the code and the presentation of the API, it's helpful not to have to think about how one affects the other.  You might find it helpful, too.
+
+h3. but what about "map-template":https://github.com/ztellman/potemkin/blob/master/src/potemkin/map.clj?
+
+That's quite a mess, isn't it?  That also happens to be the bare minimum code required to create something that looks and acts like a map, even if all it's doing is passing those calls along to another map.  That array of `throw-arity` functions is so that you get a meaningful error when you pass in the wrong numbers of arguments, rather than just an `AbstractMethodError` without any further explanation.
+
+This is further complicated by the fact that if you change how a lookup occurs, or how the key-set is calculated, several different functions need to be updated independently of each other, or the map will return inconsistent values, depending on how you access it.
+
+Because this was done once and somewhat generalized, creating a map that can lazily evaluate certain keys is as simple as "this":https://github.com/ztellman/aloha/blob/master/src/aloha/requests.clj#L29, rather that same metric ton of code pasted in and subtly modified.
+
+You can argue that the sheer perversity of what it takes to implement a map-like structure is proof that it shouldn't be attempted, but aesthetics are not a valid counter-argument against utility.  The ugliness has been contained in one place, and that's the best we can hope for.
+
+So dig in.  You might actually enjoy it.
