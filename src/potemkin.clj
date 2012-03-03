@@ -19,6 +19,7 @@
 
 (import-fn macros/unify-gensyms)
 (import-fn macros/transform-defn-bodies)
+(import-fn macros/transform-fn-bodies)
 
 
 
