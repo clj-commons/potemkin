@@ -1,6 +1,6 @@
 Potemkin is a collection of functions for reorganizing the structure of namespaces and code.  It's used in "Lamina":https://github.com/ztellman/lamina, "Aleph":https://github.com/ztellman/aleph, and "Gloss":https://github.com/ztellman/gloss.
 
-In fact, that's probably why you're reading this.  You saw an `import-fn` or `import-macro` while browsing the source of one of those libraries, and your journey of discovery has brought you here.  Welcome.
+In fact, that's probably why you're reading this.  You saw an @import-fn@ or @import-macro@ while browsing the source of one of those libraries, and your journey of discovery has brought you here.  Welcome.
 
 Typically this is where I'd document what the library does, but that's pretty well covered by the doc-strings.  Instead, given the surprising amount of criticism that's been leveled at this small and unassuming library, this README is dedicated to:
 
@@ -10,13 +10,13 @@ Clojure's namespaces conflate how you implement your code and how it's consumed 
 
 The former approach places an onus on the creator of the library; the various orthogonal pieces of his library all coexist, which can make it difficult to keep everything straight.  The latter approach places an onus on the consumers of the library, forcing them to remember exactly what functionality resides where before they can actually use it.
 
-`import-fn` and `import-macro` decouple the structure of the code from the structure of the API, allowing the library creator to structure the code however he likes, without necessarily requiring that the consumers have the same intimate understanding of that structure.
+@import-fn@ and @import-macro@ decouple the structure of the code from the structure of the API, allowing the library creator to structure the code however he likes, without necessarily requiring that the consumers have the same intimate understanding of that structure.
 
 As someone who spends a fair amount of time worrying both about the structure of the code and the presentation of the API, it's helpful not to have to think about how one affects the other.  You might find it helpful, too.
 
 h3. but what about "map-template":https://github.com/ztellman/potemkin/blob/master/src/potemkin/map.clj?
 
-That's quite a mess, isn't it?  That also happens to be the bare minimum code required to create something that looks and acts like a map, even if all it's doing is passing those calls along to another map.  That array of `throw-arity` functions is so that you get a meaningful error when you pass in the wrong numbers of arguments, rather than just an `AbstractMethodError` without any further explanation.
+That's quite a mess, isn't it?  That also happens to be the bare minimum code required to create something that looks and acts like a map, even if all it's doing is passing those calls along to another map.  That array of @throw-arity@ functions is so that you get a meaningful error when you pass in the wrong numbers of arguments, rather than just an @AbstractMethodError@ without any further explanation.
 
 This is further complicated by the fact that if you change how a lookup occurs, or how the key-set is calculated, several different functions need to be updated independently of each other, or the map will return inconsistent values, depending on how you access it.
 
