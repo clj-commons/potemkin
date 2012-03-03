@@ -18,7 +18,7 @@ h3. but what about "map-template":https://github.com/ztellman/potemkin/blob/mast
 
 That's quite a mess, isn't it?  That also happens to be the bare minimum code required to create something that looks and acts like a map, even if all it's doing is passing those calls along to another map.  That array of @throw-arity@ functions is so that you get a meaningful error when you pass in the wrong numbers of arguments, rather than just an @AbstractMethodError@ without any further explanation.
 
-This is further complicated by the fact that if you change how a lookup occurs, or how the key-set is calculated, several different functions need to be updated independently of each other, or the map will return inconsistent values, depending on how you access it.
+This is further complicated by the fact that if you change how a lookup occurs, or how the key-set is calculated, several different functions need to be updated independently of each other, or the map will return inconsistent values depending on how you access it.
 
 Because this was done once and somewhat generalized, creating a map that can lazily evaluate certain keys is as simple as "this":https://github.com/ztellman/aloha/blob/master/src/aloha/requests.clj#L29, rather that same metric ton of code pasted in and subtly modified.
 
