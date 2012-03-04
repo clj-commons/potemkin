@@ -49,35 +49,38 @@
        (postwalk strip-namespaces
          `(deftype ~name [data ~@args]
             clojure.lang.MapEquivalence
-            clojure.lang.IPersistentCollection
+
             potemkin.protocols.PotemkinMap
             (keys* [this data]
               ~(if-not keys-generator
                  `(keys ~'data)
                  `~((eval keys-generator) name 'data 'this)))
+
+            clojure.lang.IPersistentCollection
             (equiv [this x]
               (and
                 (map? x)
                 (= x (into {} this))))
             (cons [this o]
-              (cond
-                (instance? Map$Entry o)
-                (let [[a b] o]
-                  (assoc this a b))
-                (instance? IPersistentVector o)
-                (do
-                  (assert (= 2 (count o)))
-                  (let [[a b] o]
-                    (assoc this a b)))
-                :else
-                (reduce conj this o)))
+              (if-let [[k v] (seq o)]
+                (assoc this k v)
+                this))
+
             clojure.lang.Counted
             (count [this]
               (count (potemkin.protocols/keys* this ~unwrapped-data)))
+
             clojure.lang.Seqable
             (seq [this]
               (map #(MapEntry. % (.valAt this % nil)) (potemkin.protocols/keys* this ~unwrapped-data)))
+
             Object
+            (hashCode [this]
+              (reduce
+                (fn [acc [k v]]
+                  (unchecked-add acc (bit-xor (hash k) (hash v))))
+                0
+                (seq this)))
             (equals [this x]
               (or (identical? this x)
                 (and
@@ -85,6 +88,7 @@
                   (= x (into {} this)))))
             (toString [this]
               (str (into {} this)))
+
             clojure.lang.ILookup
             (valAt [this k]
               (.valAt this k nil))
@@ -92,6 +96,7 @@
               ~(if get-generator
                  ((eval get-generator) name 'data 'this 'k 'default)
                  `(get ~unwrapped-data k default)))
+
             clojure.lang.Associative
             (containsKey [this k]
               (contains? (.keySet this) k))
@@ -104,6 +109,7 @@
               ~(if assoc-generator
                  ((eval assoc-generator) name 'data 'this 'k 'v)
                  `(new ~name ~(wrapped-data `(assoc ~unwrapped-data k v)) ~@args)))
+
             java.util.Map
             (get [this k]
               (.valAt this k))
@@ -134,12 +140,15 @@
               ~(if dissoc-generator
                  ((eval dissoc-generator) name 'data 'this 'k)
                  `(new ~name ~(wrapped-data `(dissoc ~unwrapped-data k)) ~@args)))
+
             java.util.concurrent.Callable
             (call [this]
               ~(throw-arity 0))
+
             java.lang.Runnable
             (run [this]
               ~(throw-arity 0))
+
             clojure.lang.IFn
             (invoke [this]
               ~(throw-arity 0))
@@ -147,52 +156,23 @@
               (.valAt this k))
             (invoke [this k not-found]
               (.valAt this k not-found))
-            (invoke [this a1 a2 a3]
-              ~(throw-arity 3))
-            (invoke [this a1 a2 a3 a4]
-              ~(throw-arity 4))
-            (invoke [this a1 a2 a3 a4 a5]
-              ~(throw-arity 5))
-            (invoke [this a1 a2 a3 a4 a5 a6]
-              ~(throw-arity 6))
-            (invoke [this a1 a2 a3 a4 a5 a6 a7]
-              ~(throw-arity 7))
-            (invoke [this a1 a2 a3 a4 a5 a6 a7 a8]
-              ~(throw-arity 8))
-            (invoke [this a1 a2 a3 a4 a5 a6 a7 a8 a9]
-              ~(throw-arity 9))
-            (invoke [this a1 a2 a3 a4 a5 a6 a7 a8 a9 a10]
-              ~(throw-arity 10))
-            (invoke [this a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11]
-              ~(throw-arity 11))
-            (invoke [this a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12]
-              ~(throw-arity 12))
-            (invoke [this a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13]
-              ~(throw-arity 13))
-            (invoke [this a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14]
-              ~(throw-arity 14))
-            (invoke [this a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15]
-              ~(throw-arity 15))
-            (invoke [this a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16]
-              ~(throw-arity 16))
-            (invoke [this a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17]
-              ~(throw-arity 17))
-            (invoke [this a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18]
-              ~(throw-arity 18))
-            (invoke [this a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19]
-              ~(throw-arity 19))
-            (invoke [this a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20]
-              ~(throw-arity 20))
+            ~@(map
+                (fn [n]
+                  `(invoke [this ~@(repeat n '_)]
+                     ~(throw-arity n)))
+                (range 3 21))
+
             (applyTo [this args]
-              (case (count args)
-                1 (.invoke this (first args))
-                2 (.invoke this (first args) (second args))
-                ~(throw-arity (count args)))))
+              (let [cnt (count args)]
+                (case cnt
+                  1 (this (first args))
+                  2 (this (first args) (second args))
+                  ~(throw-arity 'cnt)))))
          ))))
 
 (defmacro def-custom-map
   "Allows the creation of a custom map data structure that sits atop a normal Clojure hash-map,
-   and behaves in all ways like a 
+   and behaves in all ways like a normal hash-map.
 
    By default, the type created has a single field: 'data', which contains either a hash-map or
    something that can be turned into a hash-map.  If 'data', for instance, is an atom containing
@@ -200,7 +180,7 @@
 
    (def-custom-map Foo :unwrapper deref, :wrapper atom)
 
-   It's also possible to define new definitions for get, seq, assoc, and dissoc operations.
+   It's also possible to define new definitions for get, keys, assoc, and dissoc operations.
    These overrides must be functions that accept the following arguments, respectively:
 
    :get    (fn [type-name data this key default-value] ...)
@@ -209,17 +189,17 @@
    :keys   (fn [type-name data this] ...)
 
    The function should then return quoted syntax that performs the specified operation as
-   is appropriate.  A simple 'lazy' map that auto-dereferences values such as promises
-   and delays would look like this:
+   is appropriate.  A simple 'lazy' map that auto-dereferences values defined with (delay ...)
+   would look like this:
 
-  (def-custom-map LazyMap
-    :get (fn [_ data _ key default-value]
-           `(if-not (contains? ~data ~key)
-             ~default-value
-             (let [val# (get ~data ~key)]
-               (if (delay? val#)
-                 @val#
-                 val#)))))
+   (def-custom-map LazyMap
+     :get (fn [_ data _ key default-value]
+            `(if-not (contains? ~data ~key)
+              ~default-value
+              (let [val# (get ~data ~key)]
+                (if (delay? val#)
+                  @val#
+                  val#)))))
 
   "
   [name & {overrides :overrides :as args}]
