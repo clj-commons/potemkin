@@ -22,6 +22,6 @@ This is further complicated by the fact that if you change how a lookup occurs, 
 
 Because this was done once and somewhat generalized, creating a map that can lazily evaluate certain keys is as simple as "this":https://github.com/ztellman/aloha/blob/master/src/aloha/requests.clj#L29, rather that same metric ton of code pasted in and subtly modified.
 
-You can argue that the sheer perversity of what it takes to implement a map-like structure is proof that it shouldn't be attempted, but aesthetics are not a valid counter-argument against utility.  The ugliness has been contained in one place, and that's the best we can hope for.
+You can argue that the sheer perversity of what it takes to implement a map-like structure is proof that it shouldn't be attempted, but aesthetics are not a strong argument against utility.  The ugliness has been contained in one place, and that's the best we can hope for.
 
 So dig in.  You might actually enjoy it.
