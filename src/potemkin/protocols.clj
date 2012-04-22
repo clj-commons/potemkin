@@ -8,7 +8,11 @@
 
 (ns potemkin.protocols)
 
-(defprotocol PotemkinMap
-  (keys* [this data]))
+(defmacro defprotocol-once [name & body]
+  (if (resolve name)
+    `(do)
+    (list* 'defprotocol name body)))
 
+(defprotocol-once PotemkinMap
+  (keys* [this data]))
 

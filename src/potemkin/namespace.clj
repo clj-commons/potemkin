@@ -23,7 +23,7 @@
     (when-not vr
       (throw (IllegalArgumentException. (str "Don't recognize " sym))))
     `(do
-       (def ~(with-meta n {:protocol protocol}) ~sym)
+       (def ~(with-meta n {:protocol protocol}) (deref ~vr))
        (alter-meta! (var ~n) assoc
          :doc ~doc
          :arglists ~(list 'quote arglists)

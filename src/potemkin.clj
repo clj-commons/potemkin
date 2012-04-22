@@ -10,7 +10,8 @@
   (:require
     [potemkin.namespace :as namespace]
     [potemkin.map :as map]
-    [potemkin.macros :as macros]))
+    [potemkin.macros :as macros]
+    [potemkin.protocols :as protocols]))
 
 (namespace/import-macro namespace/import-macro) ;; totally meta
 (import-macro namespace/import-fn)
@@ -20,6 +21,8 @@
 (import-fn macros/unify-gensyms)
 (import-fn macros/transform-defn-bodies)
 (import-fn macros/transform-fn-bodies)
+
+(import-fn protocols/defprotocol-once)
 
 
 
