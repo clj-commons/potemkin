@@ -8,7 +8,9 @@
 
 (ns potemkin.protocols)
 
-(defmacro defprotocol-once [name & body]
+(defmacro defprotocol-once
+  "defonce for defprotocol"
+  [name & body]
   (if (resolve name)
     `(do)
     (list* 'defprotocol name body)))

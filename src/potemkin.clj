@@ -22,7 +22,7 @@
 (import-fn macros/transform-defn-bodies)
 (import-fn macros/transform-fn-bodies)
 
-(import-fn protocols/defprotocol-once)
+(import-macro protocols/defprotocol-once)
 
 
 

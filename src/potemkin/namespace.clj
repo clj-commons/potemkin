@@ -22,6 +22,8 @@
         protocol (:protocol m)]
     (when-not vr
       (throw (IllegalArgumentException. (str "Don't recognize " sym))))
+    (when (:macro m)
+      (throw (IllegalArgumentException. (str "Calling import-fn on a macro: " sym))))
     `(do
        (def ~(with-meta n {:protocol protocol}) (deref ~vr))
        (alter-meta! (var ~n) assoc
@@ -43,6 +45,8 @@
         doc (:doc m)]
     (when-not vr
       (throw (IllegalArgumentException. (str "Don't recognize " sym))))
+    (when-not (:macro m)
+      (throw (IllegalArgumentException. (str "Calling import-macro on a non-macro: " sym))))
     `(do
        (def ~n ~(resolve sym))
        (alter-meta! (var ~n) assoc
