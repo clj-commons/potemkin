@@ -15,6 +15,13 @@
     `(do)
     (list* 'defprotocol name body)))
 
+(defmacro deftype-once
+  "defonce for deftype"
+  [name & body]
+  (if (resolve name)
+    `(do)
+    (list* 'deftype name body)))
+
 (defprotocol-once PotemkinMap
   (keys* [this data]))
 
