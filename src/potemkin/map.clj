@@ -74,6 +74,15 @@
             (seq [this]
               (map #(MapEntry. % (.valAt this % nil)) (potemkin.protocols/keys* this ~unwrapped-data)))
 
+            clojure.core.protocols.CollReduce
+            (coll-reduce
+              [this f]
+              (reduce f (seq this)))
+
+            (coll-reduce
+              [this f val#]
+              (reduce f val# (seq this)))
+            
             Object
             (hashCode [this]
               (reduce
