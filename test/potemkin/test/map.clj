@@ -53,7 +53,15 @@
     (is (= [[:a 1]] s)))
 
   (let [m (conj m [:a 1])]
-    (is (= {:a 1} m))))
+    (is (= {:a 1} m)))
+
+  (let [m (-> m (assoc :a 1) (assoc :b 2))
+        s (reduce
+           (fn [s [k v]]
+             (+ s v))
+           0
+           m)]
+    (is (= 3 s))))
 
 (deftest test-maps
   (test-basic-map-functionality (SimpleMap. {}))
