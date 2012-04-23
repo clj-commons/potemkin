@@ -59,8 +59,8 @@
             clojure.lang.IPersistentCollection
             (equiv [this x]
               (and
-                (map? x)
-                (= x (into {} this))))
+               (map? x)
+               (= x (into {} this))))
             (cons [this o]
               (if-let [[k v] (seq o)]
                 (assoc this k v)
@@ -74,27 +74,38 @@
             (seq [this]
               (map #(MapEntry. % (.valAt this % nil)) (potemkin.protocols/keys* this ~unwrapped-data)))
 
-            clojure.core.protocols.CollReduce
-            (coll-reduce
-              [this f]
-              (reduce f (seq this)))
+            ~@(when (or (> (:major *clojure-version*) 1)
+                       (and (= (:major *clojure-version*) 1)
+                            (>= (:minor *clojure-version*) 4)))
+               `(clojure.core.protocols.CollReduce
+                 (coll-reduce
+                   [this f]
+                   (reduce f (seq this)))
+                 (coll-reduce
+                   [this f val#]
+                   (reduce f val# (seq this)))))
+            
+            ;; clojure.core.protocols.CollReduce
+            ;; (coll-reduce
+            ;;   [this f]
+            ;;   (reduce f (seq this)))
 
-            (coll-reduce
-              [this f val#]
-              (reduce f val# (seq this)))
+            ;; (coll-reduce
+            ;;   [this f val#]
+            ;;   (reduce f val# (seq this)))
             
             Object
             (hashCode [this]
               (reduce
-                (fn [acc [k v]]
-                  (unchecked-add acc (bit-xor (hash k) (hash v))))
-                0
-                (seq this)))
+               (fn [acc [k v]]
+                 (unchecked-add acc (bit-xor (hash k) (hash v))))
+               0
+               (seq this)))
             (equals [this x]
               (or (identical? this x)
-                (and
-                  (map? x)
-                  (= x (into {} this)))))
+                  (and
+                   (map? x)
+                   (= x (into {} this)))))
             (toString [this]
               (str (into {} this)))
 
@@ -168,7 +179,7 @@
             ~@(map
                 (fn [n]
                   `(invoke [this ~@(repeat n '_)]
-                     ~(throw-arity n)))
+                           ~(throw-arity n)))
                 (range 3 21))
 
             (applyTo [this args]
