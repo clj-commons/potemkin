@@ -22,6 +22,13 @@
     `(do)
     (list* 'deftype name body)))
 
+(defmacro defrecord-once
+  "defonce for defrecord"
+  [name & body]
+  (if (resolve name)
+    `(do)
+    (list* 'defrecord name body)))
+
 (defprotocol-once PotemkinMap
   (keys* [this data]))
 

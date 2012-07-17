@@ -1,4 +1,4 @@
-(defproject potemkin "0.1.4"
+(defproject potemkin "0.1.5-SNAPSHOT"
   :description "Some useful facades."
   :dependencies [[org.clojure/clojure "1.3.0"]]
   :repositories {"sonatype-oss-public" "https://oss.sonatype.org/content/groups/public/"}

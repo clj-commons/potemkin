@@ -24,6 +24,7 @@
 
 (import-macro protocols/defprotocol-once)
 (import-macro protocols/deftype-once)
+(import-macro protocols/defrecord-once)
 
 
 
