@@ -62,9 +62,11 @@
                (map? x)
                (= x (into {} this))))
             (cons [this o]
-              (if-let [[k v] (seq o)]
-                (assoc this k v)
-                this))
+              (if (map? o)
+                (reduce #(apply assoc %1 %2) this o)
+                (if-let [[k v] (seq o)]
+                  (assoc this k v)
+                  this)))
 
             clojure.lang.Counted
             (count [this]
@@ -84,15 +86,6 @@
                  (coll-reduce
                    [this f val#]
                    (reduce f val# (seq this)))))
-            
-            ;; clojure.core.protocols.CollReduce
-            ;; (coll-reduce
-            ;;   [this f]
-            ;;   (reduce f (seq this)))
-
-            ;; (coll-reduce
-            ;;   [this f val#]
-            ;;   (reduce f val# (seq this)))
             
             Object
             (hashCode [this]

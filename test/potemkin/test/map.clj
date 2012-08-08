@@ -46,6 +46,12 @@
     (is (= [:a] (keys m)))
     (is (= [[:a 1]] (seq m))))
 
+  (let [m (assoc m :a 1)]
+    (is (= {:a 1, :b 2, :c 3}
+          (merge m {:b 2} {:c 3})
+          (merge m {:b 2, :c 3})
+          (merge {:b 2, :c 3} m))))
+
   (let [m (-> m (assoc :a 1) (dissoc :a))]
     (is (not (contains? m :a))))
 
@@ -66,5 +72,3 @@
 (deftest test-maps
   (test-basic-map-functionality (SimpleMap. {}))
   (test-basic-map-functionality (SimpleOverrides. {})))
-
-
