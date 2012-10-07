@@ -26,7 +26,9 @@
   (let [gensym* (memoize gensym)]
     (postwalk
       #(if (gensym? %)
-         (symbol (str (gensym* (str (un-gensym %) "__")) "__auto__"))
+         (with-meta
+           (symbol (str (gensym* (str (un-gensym %) "__")) "__auto__"))
+           (meta %))
          %)
       body)))
 
@@ -46,6 +48,7 @@
                         (let [args (first arity-form)]
                           `(~args ~@(f args (rest arity-form)))))
                       arity-forms)]
+    (prn arity-forms)
     `(~(first form)
       ~(second form)
       (fn* ~@arity-forms))))
