@@ -25,3 +25,7 @@ Because this was done once and somewhat generalized, creating a map that can laz
 You can argue that the sheer perversity of what it takes to implement a map-like structure is proof that it shouldn't be attempted, but aesthetics are not a strong argument against utility.  The ugliness has been contained in one place, and that's the best we can hope for.
 
 So dig in.  You might actually enjoy it.
+
+h2. License
+
+Distributed under the Eclipse Public License, which is also used by Clojure.
