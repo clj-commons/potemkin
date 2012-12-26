@@ -58,6 +58,8 @@
 
 (defn equivalent?
   [a b]
-  (=
-    (->> a (prewalk macroexpand) normalize-gensyms)
-    (->> b (prewalk macroexpand) normalize-gensyms)))
+  (if-not (and a b)
+    (= a b)
+    (=
+     (->> a (prewalk macroexpand) normalize-gensyms)
+     (->> b (prewalk macroexpand) normalize-gensyms))))

@@ -141,15 +141,18 @@
                expand-deftype
                deftype*->deftype)
 
-        prev-body (@type-bodies (-> name resolve str))]
+        classname (with-meta (symbol (str (namespace-munge *ns*) "." name)) (meta name))
 
+        prev-body (@type-bodies classname)]
+    
     (when-not (and prev-body
                 (equivalent?
                   (transform-deftype* #(drop 3 %) prev-body)
                   (transform-deftype* #(drop 3 %) body)))
-      `(let [p# ~body]
-         (swap! type-bodies assoc ~(-> name resolve str) '~(prewalk macroexpand body))
-         p#))))
+      
+      (swap! type-bodies assoc classname (prewalk macroexpand body))
+
+      body)))
 
 (defmacro defrecord+
   "A defrecord that won't evaluate if an equivalent datatype with the same name already exists,
