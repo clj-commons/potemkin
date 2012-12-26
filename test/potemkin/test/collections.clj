@@ -6,22 +6,16 @@
 ;;   the terms of this license.
 ;;   You must not remove this notice, or any other, from this software.
 
-(ns potemkin.test.map
+(ns potemkin.test.collections
   (:use
     [clojure test]
     [potemkin]))
 
-(def-custom-map SimpleMap)
-
-(def-custom-map SimpleOverrides
-  :get (fn [_ data _ key default-value]
-         `(get ~data ~key ~default-value))
-  :assoc (fn [type-name data _ key value]
-           `(new ~type-name (assoc ~data ~key ~value)))
-  :dissoc (fn [type-name data _ key]
-            `(new ~type-name (dissoc ~data ~key)))
-  :keys (fn [_ data _]
-          `(keys ~data)))
+(def-map-type SimpleMap [m]
+  (get [_ k d] (get m k d))
+  (assoc [_ k v] (SimpleMap. (assoc m k v)))
+  (dissoc [_ k] (SimpleMap. (dissoc m k)))
+  (keys [_] (keys m)))
 
 (defn test-basic-map-functionality [m]
 
@@ -70,5 +64,4 @@
     (is (= 3 s))))
 
 (deftest test-maps
-  (test-basic-map-functionality (SimpleMap. {}))
-  (test-basic-map-functionality (SimpleOverrides. {})))
+  (test-basic-map-functionality (SimpleMap. {})))

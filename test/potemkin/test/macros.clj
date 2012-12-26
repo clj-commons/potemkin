@@ -21,34 +21,3 @@
 
 (deftest test-unify-form
   (is (= 100 @(eval (simple-unify-form)))))
-
-(declare foo)
-
-(defn test-transform-defn [form & arities]
-  (in-ns 'potemkin.test.macros)
-  (eval (transform-defn-bodies (constantly [1]) form))
-  (doseq [a arities]
-    (is (= 1 (apply foo (repeat a nil))))))
-
-(deftest test-transform-defn-bodies
-  (test-transform-defn `(defn foo [x#])
-    1)
-  (test-transform-defn `(defn foo [])
-    0)
-  (test-transform-defn `(defn foo "doc-string" {:abc :def} ([]) ([x#]) ([x# y#]))
-    0 1 2))
-
-(defn test-transform-fn [form & arities]
-  (let [f (eval (transform-fn-bodies (constantly [1]) form))]
-    (doseq [a arities]
-      (is (= 1 (apply f (repeat a nil)))))))
-
-(deftest test-transform-fn-bodies
-  (test-transform-fn `(fn [x#])
-    1)
-  (test-transform-fn `(fn foo [x#])
-    1)
-  (test-transform-fn `(fn foo [])
-    0)
-  (test-transform-fn `(fn foo ([]) ([x#]) ([x# y#]))
-    0 1 2))

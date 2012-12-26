@@ -8,23 +8,34 @@
 
 (ns potemkin
   (:require
-    [potemkin.namespace :as namespace]
-    [potemkin.map :as map]
-    [potemkin.macros :as macros]
-    [potemkin.protocols :as protocols]))
+    [potemkin namespaces types collections macros]))
 
-(namespace/import-macro namespace/import-macro) ;; totally meta
-(import-macro namespace/import-fn)
+(potemkin.namespaces/import-vars potemkin.namespaces/import-vars) ;; totally meta
 
-(import-macro map/def-custom-map)
+(import-vars
+  [potemkin.namespaces
 
-(import-fn macros/unify-gensyms)
-(import-fn macros/transform-defn-bodies)
-(import-fn macros/transform-fn-bodies)
+   import-fn
+   import-macro
+   import-def]
 
-(import-macro protocols/defprotocol-once)
-(import-macro protocols/deftype-once)
-(import-macro protocols/defrecord-once)
+  [potemkin.macros
+
+   unify-gensyms
+   normalize-gensyms
+   equivalent?]
+
+  [potemkin.types
+
+   defprotocol+
+   deftype+
+   defrecord+]
+
+  [potemkin.collections
+
+   def-map-type])
+
+
 
 
 

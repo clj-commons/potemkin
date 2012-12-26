@@ -6,7 +6,7 @@
 ;;   the terms of this license.
 ;;   You must not remove this notice, or any other, from this software.
 
-(ns potemkin.namespace
+(ns potemkin.namespaces
   (:use [clojure pprint]))
 
 (defmacro import-fn 
@@ -15,7 +15,6 @@
   [sym]
   (let [vr (resolve sym)
         m (meta vr)
-        nspace (:name m)
         n (:name m)
         arglists (:arglists m)
         doc (:doc m)
@@ -40,7 +39,6 @@
   (let [vr (resolve sym)
         m (meta vr)
         n (:name m)
-        nspace (:ns m)
         arglists (:arglists m)
         doc (:doc m)]
     (when-not vr
@@ -56,3 +54,50 @@
          :line ~(:line m))
        (.setMacro (var ~n))
        ~vr)))
+
+(defmacro import-def 
+  "Given a regular def'd var from another namespace, defined a new var with the
+   same name in the current namespace."
+  [sym]
+  (let [vr (resolve sym)
+        m (meta vr)
+        n (:name m)
+        n (if (:dynamic m) (with-meta n {:dynamic true}) n) 
+        nspace (:ns m)
+        doc (:doc m)]
+    (when-not vr
+      (throw (IllegalArgumentException. (str "Don't recognize " sym))))
+    `(do
+       (def ~n @~vr)
+       (alter-meta! (var ~n) assoc
+         :doc ~doc
+         :file ~(:file m)
+         :line ~(:line m))
+       ~vr)))
+
+(defmacro import-vars
+  "Imports a list of vars from other namespaces."
+  [& syms]
+  (let [unravel (fn unravel [x]
+                  (if (sequential? x)
+                    (->> x
+                      rest
+                      (mapcat unravel)
+                      (map
+                        #(symbol
+                           (str (first x)
+                             (when-let [n (namespace %)]
+                               (str "." n)))
+                           (name %))))
+                    [x]))
+        syms (mapcat unravel syms)]
+    `(do
+       ~@(map
+           (fn [sym]
+             (let [vr (resolve sym)
+                   m (meta vr)]
+               (cond
+                 (:macro m) `(import-macro ~sym)
+                 (:arglists m) `(import-fn ~sym)
+                 :else `(import-def ~sym))))
+           syms))))

@@ -6,7 +6,7 @@
 ;;   the terms of this license.
 ;;   You must not remove this notice, or any other, from this software.
 
-(ns potemkin.test.namespace
+(ns potemkin.test.namespaces
   (:use
     potemkin
     clojure.test
