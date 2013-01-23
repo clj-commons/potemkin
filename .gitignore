@@ -4,3 +4,4 @@ lib
 classes
 .lein*
 target/**
+.DS_Store

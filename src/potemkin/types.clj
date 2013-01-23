@@ -155,13 +155,18 @@
       body)))
 
 (defmacro defrecord+
-  "A defrecord that won't evaluate if an equivalent datatype with the same name already exists,
-   and allows abstract types to be used."
+  "A defrecord that won't evaluate if an equivalent datatype with the same name already exists."
   [name & body]
-  (list* 'deftype+ name
-    (->> (list* 'defrecord name body)
-      macroexpand
-      deftype->deftype*
-      deftype*->deftype
-      (drop 2))))
+  (let [classname (with-meta (symbol (str (namespace-munge *ns*) "." name)) (meta name))
+
+        prev-body (@type-bodies classname)]
+    
+    (when-not (and prev-body
+                (equivalent?
+                  body
+                  prev-body))
+      
+      (swap! type-bodies assoc classname (prewalk macroexpand body))
+      
+      `(defrecord ~name ~@body))))
 
