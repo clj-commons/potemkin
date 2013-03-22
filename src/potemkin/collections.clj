@@ -193,11 +193,70 @@
          (deftype+ ~name ~params ~'potemkin.collections/AbstractMap
            ~@(map
                #(if (sequential? %)
-                  (list* (get fns  (first %) (first %)) (rest %))
+                  (list* (get fns (first %) (first %)) (rest %))
                   %)
                body))
          (defmethod print-method ~classname [o# ~(with-meta `w## {:tag "java.io.Writer"})]
            (.write w## (str o#)))
          ~classname))))
 
+(defmacro def-derived-map
+  "Allows a map type to be defined where key-value pairs may be derived from fields.
 
+   For instance, if we want to create a map which contains both upper and lower-case
+   versions of a string without immediately instantiating both, we can do this:
+
+   (def-derived-map StringMap [^String s]
+     :lower-case (.toLowerCase s)
+     :upper-case (.toUpperCase s))
+
+   The resulting map will be have correctly if the defined keys are removed, shadowed,
+   etc.
+
+   The above class will automatically create a constructor named '->StringMap'."
+  [name params & key-vals]
+  (let [key-set (->> key-vals (partition 2) (map first) set)]
+    (unify-gensyms
+      `(do
+       
+        (def-map-type ~name ~(vec (conj params `added## `removed##))
+         
+          (~'get [this# key# default-value#]
+            (cond
+              (contains? added## key#)
+              (get added## key#)
+           
+              (contains? removed## key#)
+              default-value#
+           
+              :else
+              (case key#
+                ~@key-vals
+                default-value#)))
+       
+          (~'keys [this#]
+            (let [keys# ~key-set
+                  keys# (if-not (empty? removed##)
+                          (remove #(contains? removed## %) keys#)
+                          keys#)
+                  keys# (if-not (empty? added##)
+                          (set (concat keys# (keys added##)))
+                          keys#)]
+              keys#))
+       
+          (~'assoc [this# key# value#]
+            (new ~name ~@params (assoc added## key# value#) removed##))
+       
+          (~'dissoc [this# key#]
+            (cond
+              (contains? added## key#)
+              (new ~name ~@params (dissoc added## key#) removed##)
+           
+              (contains? ~key-set key#)
+              (new ~name ~@params added## (set (conj removed## key#)))
+           
+              :else
+              this#)))
+
+        (defn ~(symbol (str "->" name)) [~@params]
+          (new ~name ~@params nil nil))))))

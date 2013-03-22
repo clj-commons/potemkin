@@ -34,6 +34,7 @@
 
   [potemkin.collections
 
+   def-derived-map
    def-map-type])
 
 

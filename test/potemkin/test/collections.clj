@@ -17,6 +17,13 @@
   (dissoc [_ k] (SimpleMap. (dissoc m k)))
   (keys [_] (keys m)))
 
+(def-derived-map SimpleDerivedMap [])
+
+(def-derived-map DerivedMap [^String s]
+  :string s
+  :lower (.toLowerCase s)
+  :upper (.toUpperCase s))
+
 (defn test-basic-map-functionality [m]
 
   (let [kvs (interleave (range 1e5) (map #(- Long/MAX_VALUE %) (range 1e5)))
@@ -64,4 +71,12 @@
     (is (= 3 s))))
 
 (deftest test-maps
-  (test-basic-map-functionality (SimpleMap. {})))
+  (test-basic-map-functionality (SimpleMap. {}))
+  (test-basic-map-functionality (->SimpleDerivedMap)))
+
+(deftest test-derived-map
+  (let [m (->DerivedMap "AbC")]
+    (is (= {:string "AbC" :lower "abc" :upper "ABC"} m))
+    (is (= {:lower "abc" :upper "ABC"} (dissoc m :string)))
+    (is (= {:string "foo" :lower "abc" :upper "ABC" :bar "baz"}
+          (assoc m :string "foo" :bar "baz")))))
