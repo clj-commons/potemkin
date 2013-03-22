@@ -29,7 +29,8 @@
 
    defprotocol+
    deftype+
-   defrecord+]
+   defrecord+
+   definterface+]
 
   [potemkin.collections
 

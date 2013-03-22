@@ -130,6 +130,45 @@
          (alter-meta! (resolve p#) assoc :potemkin/body '~(prewalk macroexpand body))
          p#))))
 
+(def interface-bodies (atom {}))
+
+(defmacro definterface+
+  "An interface that won't evaluate if an equivalent interface already exists.
+
+   Self parameters and multiple arities are defined like defprotocol, as well as wrapping
+   functions for each, so it can be used to replace defprotocol seamlessly."
+  [name & body]
+  (let [prev-body (get @interface-bodies name)]
+    (when-not (equivalent? prev-body body)
+
+      (swap! interface-bodies assoc name body)
+
+      (let [fn-names (map first body)
+            unrolled-body (mapcat
+                            (fn [[fn-name & arg-lists+doc-string]]
+                              (let [arg-lists (remove string? arg-lists+doc-string)]
+                                (map #(list fn-name (rest %)) arg-lists)))
+                            body)]
+        
+        `(let [p# (definterface
+                    ~name
+                    ~@unrolled-body)]
+           ~@(map
+               (fn [[fn-name & arg-lists+doc-string]]
+                 (let [arg-lists (remove string? arg-lists+doc-string)
+                       doc-string (filter string? arg-lists+doc-string)]
+                   `(defn ~fn-name
+                      ~@doc-string
+                      ~@(map
+                          (fn [args]
+                            `(~args
+                               (~(symbol (str "." fn-name))
+                                ~(with-meta (first args) {:tag name})
+                                ~@(rest args))))
+                          arg-lists))))
+               body)
+           p#)))))
+
 (def type-bodies (atom {}))
 
 (defmacro deftype+

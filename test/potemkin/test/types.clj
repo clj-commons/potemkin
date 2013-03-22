@@ -25,3 +25,8 @@
   (is (not= nil (eval '(defprotocol+ Bar (bar [x y])))))
   (is (= nil (eval '(defprotocol+ Bar (bar [x y])))))
   (is (not= nil (eval '(defprotocol+ Bar (bar [x y z]))))))
+
+(deftest test-definterface+
+  (is (not= nil (eval '(definterface+ Bar (bar [x y])))))
+  (is (= nil (eval '(definterface+ Bar (bar [x y])))))
+  (is (not= nil (eval '(definterface+ Bar (bar [x y z]))))))
