@@ -9,7 +9,9 @@
 (ns potemkin.types
   (:use
     [clojure walk [set :only (union)]]
-    [potemkin.macros :only (equivalent? normalize-gensyms safe-resolve)]))
+    [potemkin.macros :only (equivalent? normalize-gensyms safe-resolve)])
+  (:require
+    [clojure.string :as str]))
 
 ;;;
 
@@ -130,7 +132,33 @@
          (alter-meta! (resolve p#) assoc :potemkin/body '~(prewalk macroexpand body))
          p#))))
 
+;;;
+
 (def interface-bodies (atom {}))
+
+(def clojure-fn-subs
+  [[#"\?"  "_QMARK_"]
+   [#"\-"   "_"]
+   [#"!"    "_BANG_"]
+   [#"\+"   "_PLUS_"]
+   [#">"    "_GT_"]
+   [#"<"    "_LT_"]
+   [#"="    "_EQ_"]
+   [#"\*"   "_STAR_"]
+   [#"/"    "_SLASH_"]])
+
+(defn munge-fn-name [n]
+  (symbol
+    (reduce
+      (fn [s [regex replacement]]
+        (str/replace s regex replacement))
+      (name n)
+      clojure-fn-subs)))
+
+(defn resolve-tags [n]
+  (if-let [tag (-> n meta :tag)]
+    (with-meta n (assoc (meta n) :tag (resolve tag)))
+    n))
 
 (defmacro definterface+
   "An interface that won't evaluate if an equivalent interface already exists.
@@ -147,7 +175,10 @@
             unrolled-body (mapcat
                             (fn [[fn-name & arg-lists+doc-string]]
                               (let [arg-lists (remove string? arg-lists+doc-string)]
-                                (map #(list fn-name (rest %)) arg-lists)))
+                                (map
+                                  #(list (munge-fn-name fn-name)
+                                     (vec (map resolve-tags (rest %))))
+                                  arg-lists)))
                             body)]
         
         `(let [p# (definterface
@@ -162,12 +193,16 @@
                       ~@(map
                           (fn [args]
                             `(~args
-                               (~(symbol (str "." fn-name))
-                                ~(with-meta (first args) {:tag name})
+                               (~(symbol (str "." (munge-fn-name fn-name)))
+                                ~(with-meta
+                                   (first args)
+                                   {:tag (str (ns-name *ns*) "." name)})
                                 ~@(rest args))))
                           arg-lists))))
                body)
            p#)))))
+
+;;;
 
 (def type-bodies (atom {}))
 
@@ -192,6 +227,8 @@
       (swap! type-bodies assoc classname (prewalk macroexpand body))
 
       body)))
+
+;;;
 
 (defmacro defrecord+
   "A defrecord that won't evaluate if an equivalent datatype with the same name already exists."
