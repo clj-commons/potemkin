@@ -23,7 +23,9 @@
 
    unify-gensyms
    normalize-gensyms
-   equivalent?]
+   equivalent?
+   condp-case
+   try*]
 
   [potemkin.types
 
