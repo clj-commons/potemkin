@@ -25,7 +25,9 @@
    normalize-gensyms
    equivalent?
    condp-case
-   try*]
+   try*
+   fast-bound-fn
+   fast-bound-fn*]
 
   [potemkin.types
 
