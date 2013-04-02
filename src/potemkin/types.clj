@@ -134,8 +134,6 @@
 
 ;;;
 
-(def interface-bodies (atom {}))
-
 (def clojure-fn-subs
   [[#"\?"  "_QMARK_"]
    [#"\-"   "_"]
@@ -160,6 +158,16 @@
     (with-meta n (assoc (meta n) :tag (resolve tag)))
     n))
 
+(def interface-bodies (atom {}))
+
+(defn precompiled-interface? [x]
+  (and
+    (try
+      (resolve (symbol x))
+      (catch Exception e
+        nil))
+    (not (contains? interface-bodies x))))
+
 (defmacro definterface+
   "An interface that won't evaluate if an equivalent interface already exists.
 
@@ -167,7 +175,7 @@
    functions for each, so it can be used to replace defprotocol seamlessly."
   [name & body]
   (let [prev-body (get @interface-bodies name)]
-    (when-not (equivalent? prev-body body)
+    (when-not (or (precompiled-interface? name) (equivalent? prev-body body))
 
       (swap! interface-bodies assoc name body)
 
