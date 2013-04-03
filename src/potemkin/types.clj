@@ -15,6 +15,10 @@
 
 ;;;
 
+(definterface PotemkinType)
+
+;;;
+
 (defn clean-deftype [x]
   (let [version (let [{:keys [major minor incremental ]} *clojure-version*]
                   (str major "." minor "." incremental))]
@@ -23,19 +27,12 @@
          (neg? (.compareTo version min-version)))
       x)))
 
-(defn resolve-local-interfaces [x]
-  (if (and (symbol? x)
-        (not (safe-resolve x))
-        (safe-resolve (symbol (str *ns* "." x))))
-    (symbol (str *ns* "." x))
-    x))
+;;;
 
 (declare merge-deftypes* deftype->deftype*)
 
 (defn abstract-type? [x]
-  (and
-    (symbol? x)
-    (= :potemkin/abstract-type (-> x safe-resolve meta :tag))))
+  (and (symbol? x) (= :potemkin/abstract-type (-> x safe-resolve meta :tag))))
 
 (def ^:dynamic *expanded-types* #{})
 
@@ -163,19 +160,13 @@
 
 (def interface-bodies (atom {}))
 
-(defn definterface->gen-interface [name body]
-  (let [tag #(or (:tag (meta %)) Object)
-        gen-sig (fn [[name [& args]]]
-                  (vector name
-                    (vec (map tag args))
-                    (tag name)
-                    (map meta args)))
-        class-name (with-meta
-                     (symbol (str (.replace (str *ns*) \- \_) "." name))
-                     (meta name))]
-    `(gen-interface
-       :name ~class-name
-       :methods ~(vec (map gen-sig body)))))
+(defn precompiled-interface? [x]
+  (and
+    (try
+      (resolve (symbol x))
+      (catch Exception e
+        nil))
+    (not (contains? interface-bodies x))))
 
 (defmacro definterface+
   "An interface that won't evaluate if an equivalent interface already exists.
@@ -184,7 +175,7 @@
    functions for each, so it can be used to replace defprotocol seamlessly."
   [name & body]
   (let [prev-body (get @interface-bodies name)]
-    (when-not (equivalent? prev-body body)
+    (when-not (or (precompiled-interface? name) (equivalent? prev-body body))
 
       (swap! interface-bodies assoc name body)
 
@@ -198,9 +189,9 @@
                                   arg-lists)))
                             body)]
         
-        `(let [p# ~(definterface->gen-interface
-                     name
-                     unrolled-body)]
+        `(let [p# (definterface
+                    ~name
+                    ~@unrolled-body)]
            ~@(map
                (fn [[fn-name & arg-lists+doc-string]]
                  (let [arg-lists (remove string? arg-lists+doc-string)
@@ -219,8 +210,6 @@
                body)
            p#)))))
 
-(definterface PotemkinType)
-
 ;;;
 
 (def type-bodies (atom {}))
@@ -231,13 +220,10 @@
   [name params & body]
   (let [body (->> (list* 'deftype name params 'potemkin.types.PotemkinType body)
                clean-deftype
-               (map resolve-local-interfaces)
                expand-deftype
                deftype*->deftype)
 
-        classname (with-meta
-                    (symbol (str (namespace-munge *ns*) "." name))
-                    (meta name))
+        classname (with-meta (symbol (str (namespace-munge *ns*) "." name)) (meta name))
 
         prev-body (@type-bodies classname)]
     
@@ -255,9 +241,7 @@
 (defmacro defrecord+
   "A defrecord that won't evaluate if an equivalent datatype with the same name already exists."
   [name & body]
-  (let [classname (with-meta
-                    (symbol (str (namespace-munge *ns*) "." name))
-                    (meta name))
+  (let [classname (with-meta (symbol (str (namespace-munge *ns*) "." name)) (meta name))
 
         prev-body (@type-bodies classname)]
     
