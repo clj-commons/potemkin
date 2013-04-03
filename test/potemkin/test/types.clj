@@ -30,3 +30,22 @@
   (is (not= nil (eval '(definterface+ Bar (bar-baz [x y])))))
   (is (= nil (eval '(definterface+ Bar (bar-baz [x y])))))
   (is (not= nil (eval '(definterface+ Bar (bar-baz [x y z]))))))
+
+
+(defprotocol+ FooProtocol
+  (bar [x]))
+
+(definterface+ IFoo
+  (baz [x]))
+
+(deftype+ FooType [x]
+  IFoo
+  (baz [_] x)
+  FooProtocol
+  (bar [_] x))
+
+(deftest test-all
+  (let [f (FooType. 1)]
+    (is (= 1 (baz f)))
+    (is (= 1 (bar f)))))
+
