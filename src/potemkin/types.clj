@@ -229,9 +229,9 @@
   "A deftype that won't evaluate if an equivalent datatype with the same name already exists,
    and allows abstract types to be used."
   [name params & body]
-  (let [body (->> (list* 'deftype name params 'potemkin.types.PotemkinType body)
+  (let [body (->> (list* 'deftype name params 'potemkin.types.PotemkinType
+                    (map resolve-local-interfaces body))
                clean-deftype
-               (map resolve-local-interfaces)
                expand-deftype
                deftype*->deftype)
 
