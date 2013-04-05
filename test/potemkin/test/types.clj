@@ -6,27 +6,27 @@
 ;;   the terms of this license.
 ;;   You must not remove this notice, or any other, from this software.
 
-(ns potemkin.test.collections
+(ns potemkin.test.types
   (:use
     [clojure test]
     [potemkin]))
 
 (deftest test-defrecord+
-  (is (not= nil (eval '(defrecord+ Foo [x y]))))
-  (is (= nil (eval '(defrecord+ Foo [x y]))))
-  (is (not= nil (eval '(defrecord+ Foo [x y z])))))
+  (is (not= nil (eval '(potemkin/defrecord+ FooR [x y]))))
+  (is (= nil (eval '(potemkin/defrecord+ FooR [x y]))))
+  (is (not= nil (eval '(potemkin/defrecord+ FooR [x y z])))))
 
 (deftest test-deftype+
-  (is (not= nil (eval '(deftype+ Foo [x y]))))
-  (is (= nil (eval '(deftype+ Foo [x y]))))
-  (is (not= nil (eval '(deftype+ Foo [x y z])))))
+  (is (not= nil (eval '(potemkin/deftype+ FooT [x y]))))
+  (is (= nil (eval '(potemkin/deftype+ FooT [x y]))))
+  (is (not= nil (eval '(potemkin/deftype+ FooT [x y z])))))
 
 (deftest test-defprotocol+
-  (is (not= nil (eval '(defprotocol+ Bar (bar [x y])))))
-  (is (= nil (eval '(defprotocol+ Bar (bar [x y])))))
-  (is (not= nil (eval '(defprotocol+ Bar (bar [x y z]))))))
+  (is (not= nil (eval '(potemkin/defprotocol+ BarP (bar [x y])))))
+  (is (= nil (eval '(potemkin/defprotocol+ BarP (bar [x y])))))
+  (is (not= nil (eval '(potemkin/defprotocol+ BarP (bar [x y z]))))))
 
 (deftest test-definterface+
-  (is (not= nil (eval '(definterface+ Bar (bar-baz [x y])))))
-  (is (= nil (eval '(definterface+ Bar (bar-baz [x y])))))
-  (is (not= nil (eval '(definterface+ Bar (bar-baz [x y z]))))))
+  (is (not= nil (eval '(potemkin/definterface+ IBar (bar-baz [x y])))))
+  (is (= nil (eval '(potemkin/definterface+ IBar (bar-baz [x y])))))
+  (is (= nil (eval '(potemkin/definterface+ IBar (bar-baz [x y z]))))))

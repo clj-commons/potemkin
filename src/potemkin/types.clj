@@ -134,8 +134,6 @@
 
 ;;;
 
-(def interface-bodies (atom {}))
-
 (def clojure-fn-subs
   [[#"\?"  "_QMARK_"]
    [#"\-"   "_"]
@@ -161,46 +159,56 @@
     n))
 
 (defmacro definterface+
-  "An interface that won't evaluate if an equivalent interface already exists.
+  "An interface that won't evaluate if an interface with that name already exists.
 
    Self parameters and multiple arities are defined like defprotocol, as well as wrapping
    functions for each, so it can be used to replace defprotocol seamlessly."
   [name & body]
-  (let [prev-body (get @interface-bodies name)]
-    (when-not (equivalent? prev-body body)
 
-      (swap! interface-bodies assoc name body)
+  (let [fn-names (map first body)
+        unrolled-body (mapcat
+                        (fn [[fn-name & arg-lists+doc-string]]
+                          (let [arg-lists (remove string? arg-lists+doc-string)]
+                            (map
+                              #(list (munge-fn-name fn-name)
+                                 (vec (map resolve-tags (rest %))))
+                              arg-lists)))
+                        body)]
 
-      (let [fn-names (map first body)
-            unrolled-body (mapcat
-                            (fn [[fn-name & arg-lists+doc-string]]
-                              (let [arg-lists (remove string? arg-lists+doc-string)]
-                                (map
-                                  #(list (munge-fn-name fn-name)
-                                     (vec (map resolve-tags (rest %))))
-                                  arg-lists)))
-                            body)]
-        
-        `(let [p# (definterface
+    `(let [p# ~(if (try
+                     (Class/forName (str *ns* "." name))
+                     true
+                     (catch Exception _
+                       false))
+
+                 ;; already exists, just re-import it
+                 `(do
+                    (import ~(symbol (str *ns* "." name)))
+                    nil)
+
+                 ;; define the interface
+                 `(definterface
                     ~name
-                    ~@unrolled-body)]
-           ~@(map
-               (fn [[fn-name & arg-lists+doc-string]]
-                 (let [arg-lists (remove string? arg-lists+doc-string)
-                       doc-string (filter string? arg-lists+doc-string)]
-                   `(defn ~fn-name
-                      ~@doc-string
-                      ~@(map
-                          (fn [args]
-                            `(~args
-                               (~(symbol (str "." (munge-fn-name fn-name)))
-                                ~(with-meta
-                                   (first args)
-                                   {:tag (str (ns-name *ns*) "." name)})
-                                ~@(rest args))))
-                          arg-lists))))
-               body)
-           p#)))))
+                    ~@unrolled-body))]
+
+       ~@(map
+           (fn [[fn-name & arg-lists+doc-string]]
+             (let [arg-lists (remove string? arg-lists+doc-string)
+                   doc-string (filter string? arg-lists+doc-string)]
+               `(defn ~fn-name
+                  ~@doc-string
+                  ~@(map
+                      (fn [args]
+                        `(~args
+                           (~(symbol (str "." (munge-fn-name fn-name)))
+                            ~(with-meta
+                               (first args)
+                               {:tag (str (ns-name *ns*) "." name)})
+                            ~@(rest args))))
+                      arg-lists))))
+           body)
+       
+       p#)))
 
 ;;;
 
