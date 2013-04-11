@@ -212,7 +212,7 @@
 
 ;;;
 
-(def type-bodies (atom {}))
+(defonce type-bodies (atom {}))
 
 (defmacro deftype+
   "A deftype that won't evaluate if an equivalent datatype with the same name already exists,

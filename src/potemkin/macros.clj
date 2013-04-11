@@ -16,7 +16,8 @@
       nil)))
 
 (def unified-gensym-regex #"([a-zA-Z0-9\-]+)#__\d+__auto__$")
-(def gensym-regex #"([a-zA-Z0-9\-]+)#?__\d+(__auto__)?$")
+
+(def gensym-regex #"(_|[a-zA-Z0-9\-]+)#?_+(\d+_*#?)+(auto__)?$")
 
 (defn unified-gensym? [s]
   (and
@@ -61,8 +62,8 @@
   (if-not (and a b)
     (= a b)
     (=
-     (->> a (prewalk macroexpand) normalize-gensyms)
-     (->> b (prewalk macroexpand) normalize-gensyms))))
+      (->> a (map (partial prewalk macroexpand)) normalize-gensyms)
+      (->> b (map (partial prewalk macroexpand)) normalize-gensyms))))
 
 (defmacro fast-bound-fn
   "Creates a variant of bound-fn which doesn't assume you want a merged
