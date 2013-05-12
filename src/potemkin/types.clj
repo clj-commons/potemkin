@@ -153,10 +153,17 @@
       (name n)
       clojure-fn-subs)))
 
-(defn resolve-tags [n]
+(defn resolve-tag [n]
   (if-let [tag (-> n meta :tag)]
-    (with-meta n (assoc (meta n) :tag (resolve tag)))
+    (with-meta n
+      (assoc (meta n)
+        :tag (or
+               (#{'long 'double 'short 'int 'byte 'boolean} tag)
+               (resolve tag))))
     n))
+
+(defn untag [n]
+  (with-meta n (dissoc (meta n) :tag)))
 
 (defmacro definterface+
   "An interface that won't evaluate if an interface with that name already exists.
@@ -170,27 +177,30 @@
                         (fn [[fn-name & arg-lists+doc-string]]
                           (let [arg-lists (remove string? arg-lists+doc-string)]
                             (map
-                              #(list (munge-fn-name fn-name)
-                                 (vec (map resolve-tags (rest %))))
+                              #(list
+                                 (with-meta
+                                   (munge-fn-name fn-name)
+                                   {:tag (-> % meta :tag)})
+                                 (resolve-tag
+                                   (vec (map resolve-tag (rest %)))))
                               arg-lists)))
                         body)]
-
-    `(let [p# ~(if (try
-                     (Class/forName (str *ns* "." name))
-                     true
-                     (catch Exception _
-                       false))
-
-                 ;; already exists, just re-import it
-                 `(do
-                    (import ~(symbol (str *ns* "." name)))
-                    nil)
-
-                 ;; define the interface
-                 `(definterface
-                    ~name
-                    ~@unrolled-body))]
-
+    `(when-let [p# ~(if (try
+                          (Class/forName (str *ns* "." name))
+                          true
+                          (catch Exception _
+                            false))
+                      
+                      ;; already exists, just re-import it
+                      `(do
+                         (import ~(symbol (str *ns* "." name)))
+                         nil)
+                      
+                      ;; define the interface
+                      `(definterface
+                         ~name
+                         ~@unrolled-body))]
+       
        ~@(map
            (fn [[fn-name & arg-lists+doc-string]]
              (let [arg-lists (remove string? arg-lists+doc-string)
@@ -199,12 +209,12 @@
                   ~@doc-string
                   ~@(map
                       (fn [args]
-                        `(~args
-                           (~(symbol (str "." (munge-fn-name fn-name)))
-                            ~(with-meta
-                               (first args)
-                               {:tag (str (ns-name *ns*) "." name)})
-                            ~@(rest args))))
+                        `(~(resolve-tag args)
+                          (~(symbol (str "." (munge-fn-name fn-name)))
+                           ~(with-meta
+                              (first args)
+                              {:tag (str (ns-name *ns*) "." name)})
+                           ~@(map untag (rest args)))))
                       arg-lists))))
            body)
        

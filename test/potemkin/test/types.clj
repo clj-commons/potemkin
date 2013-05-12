@@ -30,3 +30,13 @@
   (is (not= nil (eval '(potemkin/definterface+ IBar (bar-baz [x y])))))
   (is (= nil (eval '(potemkin/definterface+ IBar (bar-baz [x y])))))
   (is (= nil (eval '(potemkin/definterface+ IBar (bar-baz [x y z]))))))
+
+(definterface+ ITest
+  (test-fn ^long [_ ^long x]))
+
+(deftype+ TestType [^long n]
+  ITest
+  (test-fn [_ x] (+ n x)))
+
+(deftest test-primitive-interface
+  (is (= 6 (test-fn (TestType. 1) 5))))

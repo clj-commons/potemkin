@@ -31,6 +31,7 @@
 
   [potemkin.types
 
+   def-abstract-type
    defprotocol+
    deftype+
    defrecord+
