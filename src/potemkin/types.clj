@@ -158,7 +158,7 @@
     (with-meta n
       (assoc (meta n)
         :tag (or
-               (#{'long 'double 'short 'int 'byte 'boolean} tag)
+               (#{'long 'double 'short 'int 'byte 'boolean 'void} tag)
                (resolve tag))))
     n))
 
