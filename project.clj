@@ -10,4 +10,8 @@
              :1.6 {:dependencies [[org.clojure/clojure "1.6.0-master-SNAPSHOT"]]}}
   :warn-on-reflection true
   :aliases {"all" ["with-profile" "1.2,dev:1.3,dev:dev:1.4,dev:1.6,dev"]}
+  :test-selectors {:default #(not (some #{::benchmark}
+                                        (cons (:tag %) (keys %))))
+                   :benchmark :benchmark
+                   :all (constantly true)}
   :repositories {"sonatype-oss-public" "https://oss.sonatype.org/content/groups/public/"})

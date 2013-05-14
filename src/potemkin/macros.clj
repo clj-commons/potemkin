@@ -7,7 +7,7 @@
 ;;   You must not remove this notice, or any other, from this software.
 
 (ns potemkin.macros
-  (:use [clojure walk]))
+  (:use [potemkin.walk]))
 
 (defn safe-resolve [x]
   (try
@@ -15,9 +15,9 @@
     (catch Exception _
       nil)))
 
-(def unified-gensym-regex #"([a-zA-Z0-9\-]+)#__\d+__auto__$")
+(def unified-gensym-regex #"([a-zA-Z0-9\-\'\*]+)#__\d+__auto__$")
 
-(def gensym-regex #"(_|[a-zA-Z0-9\-]+)#?_+(\d+_*#?)+(auto__)?$")
+(def gensym-regex #"(_|[a-zA-Z0-9\-\'\*]+)#?_+(\d+_*#?)+(auto__)?$")
 
 (defn unified-gensym? [s]
   (and
@@ -39,9 +39,7 @@
   (let [gensym* (memoize gensym)]
     (postwalk
       #(if (unified-gensym? %)
-         (with-meta
-           (symbol (str (gensym* (str (un-gensym %) "__")) "__auto__"))
-           (meta %))
+         (symbol (str (gensym* (str (un-gensym %) "__")) "__auto__"))
          %)
       body)))
 
@@ -51,9 +49,7 @@
         gensym* #(str % "__norm__" (swap! cnt inc))]
     (postwalk
       #(if (gensym? %)
-         (with-meta
-           (symbol (gensym* (un-gensym %)))
-           (meta %))
+         (symbol (gensym* (un-gensym %)))
          %)
       body)))
 
@@ -138,4 +134,5 @@
          ~(when-not (even? (count cases))
             `(throw (IllegalArgumentException. (str "no matching clause for " (pr-str val##))))
             (last cases))))))
+
 

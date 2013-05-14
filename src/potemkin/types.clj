@@ -9,7 +9,7 @@
 (ns potemkin.types
   (:use
     [clojure walk [set :only (union)]]
-    [potemkin.macros :only (equivalent? normalize-gensyms safe-resolve)])
+    [potemkin.macros :only (equivalent? normalize-gensyms safe-resolve unify-gensyms)])
   (:require
     [clojure.string :as str]))
 
@@ -204,18 +204,32 @@
        ~@(map
            (fn [[fn-name & arg-lists+doc-string]]
              (let [arg-lists (remove string? arg-lists+doc-string)
-                   doc-string (filter string? arg-lists+doc-string)]
-               `(defn ~fn-name
-                  ~@doc-string
-                  ~@(map
-                      (fn [args]
-                        `(~(resolve-tag args)
-                          (~(symbol (str "." (munge-fn-name fn-name)))
-                           ~(with-meta
-                              (first args)
-                              {:tag (str (ns-name *ns*) "." name)})
-                           ~@(map untag (rest args)))))
-                      arg-lists))))
+                   doc-string (filter string? arg-lists+doc-string)
+                   ]
+               (unify-gensyms
+                 `(defn ~fn-name
+                    ~@doc-string
+                    {:inline
+                     (fn
+                       ~@(map
+                           (fn [args]
+                             `(~(vec (map untag args))
+                                (list
+                                  '~(symbol (str "." (munge-fn-name fn-name)))
+                                  (with-meta
+                                    ~(first args)
+                                    {:tag ~(str (ns-name *ns*) "." name)})
+                                  ~@(map untag (rest args)))))
+                           arg-lists))}
+                    ~@(map
+                        (fn [args]
+                          `(~(resolve-tag args)
+                            (~(symbol (str "." (munge-fn-name fn-name)))
+                             ~(with-meta
+                                (first args)
+                                {:tag (str (ns-name *ns*) "." name)})
+                             ~@(map untag (rest args)))))
+                        arg-lists)))))
            body)
        
        p#)))
