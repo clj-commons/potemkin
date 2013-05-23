@@ -180,20 +180,21 @@
                               #(list
                                  (with-meta
                                    (munge-fn-name fn-name)
-                                   {:tag (-> % meta :tag)})
+                                   {:tag (-> % resolve-tag meta :tag)})
                                  (resolve-tag
                                    (vec (map resolve-tag (rest %)))))
                               arg-lists)))
-                        body)]
+                        body)
+        class-name (str/replace (str *ns* "." name) #"\-" "_")]
     `(when-let [p# ~(if (try
-                          (Class/forName (str *ns* "." name))
+                          (Class/forName class-name)
                           true
                           (catch Exception _
                             false))
                       
                       ;; already exists, just re-import it
                       `(do
-                         (import ~(symbol (str *ns* "." name)))
+                         (import ~(symbol class-name))
                          nil)
                       
                       ;; define the interface
@@ -214,12 +215,14 @@
                        ~@(map
                            (fn [args]
                              `(~(vec (map untag args))
-                                (list
-                                  '~(symbol (str "." (munge-fn-name fn-name)))
-                                  (with-meta
-                                    ~(first args)
-                                    {:tag ~(str (ns-name *ns*) "." name)})
-                                  ~@(map untag (rest args)))))
+                               (list 'let
+                                 (vector
+                                   (with-meta `x## {:tag ~class-name})
+                                   ~(first args))
+                                 (list
+                                   '~(symbol (str "." (munge-fn-name fn-name)))
+                                   `x##
+                                   ~@(map untag (rest args))))))
                            arg-lists))}
                     ~@(map
                         (fn [args]
@@ -227,7 +230,7 @@
                             (~(symbol (str "." (munge-fn-name fn-name)))
                              ~(with-meta
                                 (first args)
-                                {:tag (str (ns-name *ns*) "." name)})
+                                {:tag class-name})
                              ~@(map untag (rest args)))))
                         arg-lists)))))
            body)

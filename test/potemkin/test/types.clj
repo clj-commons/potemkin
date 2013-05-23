@@ -39,4 +39,5 @@
   (test-fn [_ x] (+ n x)))
 
 (deftest test-primitive-interface
-  (is (= 6 (test-fn (TestType. 1) 5))))
+  (is (= 6 (test-fn (TestType. 1) 5)))
+  (is (= 6 (apply test-fn (TestType. 1) [5]))))

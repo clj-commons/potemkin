@@ -19,7 +19,7 @@
             (seq? form) (outer (doall (map inner form)))
             (coll? form) (outer (into (empty form) (map inner form)))
             :else (outer form))]
-    (if (instance? clojure.lang.IMeta x)
+    (if (instance? clojure.lang.IObj x)
       (with-meta x (meta form))
       x)))
 
