@@ -1,31 +1,108 @@
-Potemkin is a collection of functions for reorganizing the structure of namespaces and code.  It's used in "Lamina":https://github.com/ztellman/lamina, "Aleph":https://github.com/ztellman/aleph, and "Gloss":https://github.com/ztellman/gloss.
+Potemkin is a collection of facades and workarounds for things that are more difficult than they should be.  All functions are within the `potemkin` namespace.
 
-In fact, that's probably why you're reading this.  You saw an @import-fn@ or @import-macro@ while browsing the source of one of those libraries, and your journey of discovery has brought you here.  Welcome.
+h3. `import-vars`
 
-Typically this is where I'd document what the library does, but that's pretty well covered by the doc-strings.  Instead, given the surprising amount of criticism that's been leveled at this small and unassuming library, this README is dedicated to:
+Clojure namespaces conflate the layout of your code and your API.  For larger libraries, this generally means that you either have large namespaces (e.g. clojure.core) or a large number of namespaces that have to be used in concert to accomplish non-trivial tasks (e.g. Ring).
 
-h2. An Apologia for Potemkin
+The former approach places an onus on the creator of the library; the various orthogonal pieces of his library all coexist, which can make it difficult to keep everything straight. The latter approach places an onus on the consumers of the library, forcing them to remember exactly what functionality resides where before they can actually use it.
 
-Clojure's namespaces conflate how you implement your code and how it's consumed by other code.  This isn't always a bad thing, but in practice this means that large projects either have surprisingly large source files (e.g. clojure.core) or a surprising number of namespaces that have to all be used in concert to accomplish complex tasks (e.g. Ring).
+`import-vars` allows functions, macros, and values to be defined in one namespace, and exposed in another.  This means that the structure of your code and the structure of your API can be decoupled.
 
-The former approach places an onus on the creator of the library; the various orthogonal pieces of his library all coexist, which can make it difficult to keep everything straight.  The latter approach places an onus on the consumers of the library, forcing them to remember exactly what functionality resides where before they can actually use it.
+```clj
+(import-vars
+  [clojure.walk
+    prewalk
+    postwalk]
+  [clojure.data
+    diff])
+```
 
-@import-fn@ and @import-macro@ decouple the structure of the code from the structure of the API, allowing the library creator to structure the code however he likes, without necessarily requiring that the consumers have the same intimate understanding of that structure.
+h3. `def-map-type`
 
-As someone who spends a fair amount of time worrying both about the structure of the code and the presentation of the API, it's helpful not to have to think about how one affects the other.  You might find it helpful, too.
+A Clojure map implements the following interfaces: `clojure.lang.IPersistentCollection`, `clojure.lang.IPersistentMap`, `clojure.lang.Counted`, `clojure.lang.Seqable`, `clojure.lang.ILookup`, `clojure.lang.Associative`, `clojure.lang.IObj`, `java.lang.Object`, `java.util.Map`, `java.util.concurrent.Callable`, `java.lang.Runnable`, and `clojure.lang.IFn`.  Between them, there's a few dozen functions, many with overlapping functionality, all of which need to be correctly implemented.
 
-h3. but what about "map-template":https://github.com/ztellman/potemkin/blob/master/src/potemkin/map.clj?
+Despite this, there are only four functions which really matter: `get`, `assoc`, `dissoc`, and `keys`.  `def-map-type` is a variant of `deftype` which, if those four functions are implemented, will look and act like a Clojure map.
 
-That's quite a mess, isn't it?  That also happens to be the bare minimum code required to create something that looks and acts like a map, even if all it's doing is passing those calls along to another map.
+For instance, here's a map which will automatically realize any delays, allowing for lazy evaluation semantics:
 
-This is further complicated by the fact that if you change how a lookup occurs, or how the key-set is calculated, several different functions need to be updated independently of each other, or the map will return inconsistent values depending on how you access it.
+```clj
+(def-map-type LazyMap [m]	
+  (get [_ k default-value]
+    (if (contains? m k)
+      (let [v (get m k)]
+        (if (instance? clojure.lang.Delay v)
+          @v
+          v))
+      default-value))
+  (assoc [_ k v]
+    (LazyMap. (assoc m k v))
+  (dissoc [_ k]
+     (LazyMap. (dissoc m k)))
+  (keys [_]
+    (keys m))))
+```
 
-Because this was done once and somewhat generalized, creating a map that can lazily evaluate certain keys is as simple as "this":https://github.com/ztellman/aloha/blob/master/src/aloha/requests.clj#L29, rather that same metric ton of code pasted in and subtly modified.
+h3. `def-abstract-type` and `deftype+`
 
-You can argue that the sheer perversity of what it takes to implement a map-like structure is proof that it shouldn't be attempted, but aesthetics are not a strong argument against utility.  The ugliness has been contained in one place, and that's the best we can hope for.
+The reason it's so laborious to define a map-like data structure is because the implementation cannot be shared between different types.  For instance, `clojure.lang.ISeq` has both `next` and `more` methods.  However, while `more` can be implemented in terms of `next`, as it is in "clojure.lang.ASeq":https://github.com/clojure/clojure/blob/master/src/jvm/clojure/lang/ASeq.java#L129, within Clojure it must be reimplemented anew for each new type.
 
-So dig in.  You might actually enjoy it.
+However, using `def-abstract-type`, we can avoid this:
 
-h2. License
+```clj
+(def-abstract-type ASeq
+  (more [this]
+    (let [n (next this)]
+      (if (empty? n)
+        '()
+        n)))))
+```
 
-Distributed under the Eclipse Public License, which is also used by Clojure.
+This abstract type may be used within the body of `deftype+`, which is just like a vanilla `deftype` except for the support for abstract types.
+
+```clj
+(deftype+ CustomSeq [s]
+  ASeq
+  clojure.lang.ISeq
+  (seq [_] s)
+  (cons [_ x] (CustomSeq. (cons x s)))
+  (next [_] (CustomSeq. (next s))))
+```
+
+h3. `definterface+`
+
+Every method on a type must be defined within a protocol or an interface.  The standard practice is to use `defprotocol`, but this imposes a certain overhead in both "time and memory":https://gist.github.com/ztellman/5603216.  If you need the extensibility of protocols, then there isn't another option, but often interfaces suffice.  While `definterface` uses an entirely different convention than `defprotocol`, `definterface+` uses the same convention, and automatically defines inline-able functions which call into the interface.  Thus, any protocol which doesn't rely on the extensibility can be trivially turned into an interface, with all the inherent savings.
+
+h3. `unify-gensyms`
+
+Gensyms enforce hygiene within macros, but when quote syntax is nested, they can become a pain.  This, for instance, doesn't work:
+
+```clj
+`(let [x# 1]
+  ~@(map 
+      (fn [n] `(+ x# ~n)) 
+      (range 3)))
+```
+
+Because `x#` is going to expand to a different gensym in the two different contexts.  One way to work around this is to explicitly create a gensym ourselves:
+
+```clj
+(let [x-sym (gensym "x")]
+  `(let [~x-sym 1]
+    ~@(map 
+        (fn [n] `(+ ~x-sym ~n)) 
+        (range 3))))
+```
+
+However, this is pretty tedious, since we may need to define quite a few of these explicit gensym names.  Using `unify-gensyms`, however, we can rely on the convention that any var with two hashes at the end should be unified:
+
+```clj
+(unify-gensyms
+  `(let [x## 1]
+    ~@(map 
+        (fn [n] `(+ x## ~n)) 
+        (range 3)))
+```
+
+h3. License
+
+Distributed under the "MIT License":http://opensource.org/licenses/MIT.  This means that pieces of this library may be copied into other libraries if they don't wish to have this as an explicit dependency, as long as it is credited within the code.
