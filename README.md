@@ -44,7 +44,7 @@ For instance, here's a map which will automatically realize any delays, allowing
 
 ### `def-abstract-type` and `deftype+`
 
-The reason it's so laborious to define a map-like data structure is because the implementation cannot be shared between different types.  For instance, `clojure.lang.ISeq` has both `next` and `more` methods.  However, while `more` can be implemented in terms of `next`, as it is in "clojure.lang.ASeq":https://github.com/clojure/clojure/blob/master/src/jvm/clojure/lang/ASeq.java#L129, within Clojure it must be reimplemented anew for each new type.
+The reason it's so laborious to define a map-like data structure is because the implementation cannot be shared between different types.  For instance, `clojure.lang.ISeq` has both `next` and `more` methods.  However, while `more` can be implemented in terms of `next`, as it is in [clojure.lang.ASeq](https://github.com/clojure/clojure/blob/master/src/jvm/clojure/lang/ASeq.java#L129), within Clojure it must be reimplemented anew for each new type.
 
 However, using `def-abstract-type`, we can avoid this:
 
@@ -70,7 +70,7 @@ This abstract type may be used within the body of `deftype+`, which is just like
 
 ### `definterface+`
 
-Every method on a type must be defined within a protocol or an interface.  The standard practice is to use `defprotocol`, but this imposes a certain overhead in both "time and memory":https://gist.github.com/ztellman/5603216.  If you need the extensibility of protocols, then there isn't another option, but often interfaces suffice.  While `definterface` uses an entirely different convention than `defprotocol`, `definterface+` uses the same convention, and automatically defines inline-able functions which call into the interface.  Thus, any protocol which doesn't rely on the extensibility can be trivially turned into an interface, with all the inherent savings.
+Every method on a type must be defined within a protocol or an interface.  The standard practice is to use `defprotocol`, but this imposes a certain overhead in both [time and memory](https://gist.github.com/ztellman/5603216).  If you need the extensibility of protocols, then there isn't another option, but often interfaces suffice.  While `definterface` uses an entirely different convention than `defprotocol`, `definterface+` uses the same convention, and automatically defines inline-able functions which call into the interface.  Thus, any protocol which doesn't rely on the extensibility can be trivially turned into an interface, with all the inherent savings.
 
 ### `unify-gensyms`
 
@@ -105,4 +105,4 @@ However, this is pretty tedious, since we may need to define quite a few of thes
 
 ### License
 
-Distributed under the "MIT License":http://opensource.org/licenses/MIT.  This means that pieces of this library may be copied into other libraries if they don't wish to have this as an explicit dependency, as long as it is credited within the code.
+Distributed under the [MIT License](http://opensource.org/licenses/MIT).  This means that pieces of this library may be copied into other libraries if they don't wish to have this as an explicit dependency, as long as it is credited within the code.
