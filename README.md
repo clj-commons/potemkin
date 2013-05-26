@@ -1,6 +1,6 @@
 Potemkin is a collection of facades and workarounds for things that are more difficult than they should be.  All functions are within the `potemkin` namespace.
 
-h3. `import-vars`
+### `import-vars`
 
 Clojure namespaces conflate the layout of your code and your API.  For larger libraries, this generally means that you either have large namespaces (e.g. clojure.core) or a large number of namespaces that have to be used in concert to accomplish non-trivial tasks (e.g. Ring).
 
@@ -17,7 +17,7 @@ The former approach places an onus on the creator of the library; the various or
     diff])
 ```
 
-h3. `def-map-type`
+### `def-map-type`
 
 A Clojure map implements the following interfaces: `clojure.lang.IPersistentCollection`, `clojure.lang.IPersistentMap`, `clojure.lang.Counted`, `clojure.lang.Seqable`, `clojure.lang.ILookup`, `clojure.lang.Associative`, `clojure.lang.IObj`, `java.lang.Object`, `java.util.Map`, `java.util.concurrent.Callable`, `java.lang.Runnable`, and `clojure.lang.IFn`.  Between them, there's a few dozen functions, many with overlapping functionality, all of which need to be correctly implemented.
 
@@ -42,7 +42,7 @@ For instance, here's a map which will automatically realize any delays, allowing
     (keys m))))
 ```
 
-h3. `def-abstract-type` and `deftype+`
+### `def-abstract-type` and `deftype+`
 
 The reason it's so laborious to define a map-like data structure is because the implementation cannot be shared between different types.  For instance, `clojure.lang.ISeq` has both `next` and `more` methods.  However, while `more` can be implemented in terms of `next`, as it is in "clojure.lang.ASeq":https://github.com/clojure/clojure/blob/master/src/jvm/clojure/lang/ASeq.java#L129, within Clojure it must be reimplemented anew for each new type.
 
@@ -68,11 +68,11 @@ This abstract type may be used within the body of `deftype+`, which is just like
   (next [_] (CustomSeq. (next s))))
 ```
 
-h3. `definterface+`
+### `definterface+`
 
 Every method on a type must be defined within a protocol or an interface.  The standard practice is to use `defprotocol`, but this imposes a certain overhead in both "time and memory":https://gist.github.com/ztellman/5603216.  If you need the extensibility of protocols, then there isn't another option, but often interfaces suffice.  While `definterface` uses an entirely different convention than `defprotocol`, `definterface+` uses the same convention, and automatically defines inline-able functions which call into the interface.  Thus, any protocol which doesn't rely on the extensibility can be trivially turned into an interface, with all the inherent savings.
 
-h3. `unify-gensyms`
+### `unify-gensyms`
 
 Gensyms enforce hygiene within macros, but when quote syntax is nested, they can become a pain.  This, for instance, doesn't work:
 
@@ -103,6 +103,6 @@ However, this is pretty tedious, since we may need to define quite a few of thes
         (range 3)))
 ```
 
-h3. License
+### License
 
 Distributed under the "MIT License":http://opensource.org/licenses/MIT.  This means that pieces of this library may be copied into other libraries if they don't wish to have this as an explicit dependency, as long as it is credited within the code.
