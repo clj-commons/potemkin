@@ -17,7 +17,9 @@
     [potemkin.test.imports :as i]))
 
 (import-macro i/multi-arity-macro)
+(import-macro i/multi-arity-macro alt-macro-name)
 (import-fn i/multi-arity-fn)
+(import-fn i/multi-arity-fn alt-name)
 (import-fn i/protocol-function)
 
 (defn drop-lines [n s]
@@ -31,11 +33,15 @@
 
 (deftest test-import-macro
   (is (out= (source i/multi-arity-macro) (source multi-arity-macro)))
-  (is (rest-out= (doc i/multi-arity-macro) (doc multi-arity-macro))))
+  (is (rest-out= (doc i/multi-arity-macro) (doc multi-arity-macro)))
+  (is (out= (source i/multi-arity-macro) (source alt-macro-name)))
+  (is (rest-out= (doc i/multi-arity-macro) (doc alt-macro-name))))
 
 (deftest test-import-fn
   (is (out= (source i/multi-arity-fn) (source multi-arity-fn)))
   (is (rest-out= (doc i/multi-arity-fn) (doc multi-arity-fn)))
+  (is (out= (source i/multi-arity-fn) (source alt-name)))
+  (is (rest-out= (doc i/multi-arity-fn) (doc alt-name)))
   (is (rest-out= (doc i/protocol-function) (doc protocol-function))))
 
 
