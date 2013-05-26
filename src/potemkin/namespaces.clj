@@ -12,20 +12,17 @@
            m (meta vr)
            n (or name (:name m))
            arglists (:arglists m)
-           doc (:doc m)
            protocol (:protocol m)]
        (when-not vr
          (throw (IllegalArgumentException. (str "Don't recognize " sym))))
        (when (:macro m)
          (throw (IllegalArgumentException.
-                 (str "Calling import-fn on a macro: " sym))))
+                  (str "Calling import-fn on a macro: " sym))))
        `(do
           (def ~(with-meta n {:protocol protocol}) (deref ~vr))
           (alter-meta! (var ~n) assoc
-                       :doc ~doc
-                       :arglists ~(list 'quote arglists)
-                       :file ~(:file m)
-                       :line ~(:line m))
+            :arglists ~(list 'quote arglists)
+            ~@(apply concat (dissoc m :arglists :name)))
           ~vr))))
 
 (defmacro import-macro
@@ -38,42 +35,38 @@
      (let [vr (resolve sym)
            m (meta vr)
            n (or name (:name m))
-           arglists (:arglists m)
-           doc (:doc m)]
+           arglists (:arglists m)]
        (when-not vr
          (throw (IllegalArgumentException. (str "Don't recognize " sym))))
        (when-not (:macro m)
          (throw (IllegalArgumentException.
-                 (str "Calling import-macro on a non-macro: " sym))))
+                  (str "Calling import-macro on a non-macro: " sym))))
        `(do
           (def ~n ~(resolve sym))
           (alter-meta! (var ~n) assoc
-                       :doc ~doc
-                       :arglists ~(list 'quote arglists)
-                       :file ~(:file m)
-                       :line ~(:line m))
+            :arglists ~(list 'quote arglists)
+            ~@(apply concat (dissoc m :arglists :name)))
           (.setMacro (var ~n))
           ~vr))))
 
 (defmacro import-def
   "Given a regular def'd var from another namespace, defined a new var with the
    same name in the current namespace."
-  [sym]
-  (let [vr (resolve sym)
-        m (meta vr)
-        n (:name m)
-        n (if (:dynamic m) (with-meta n {:dynamic true}) n)
-        nspace (:ns m)
-        doc (:doc m)]
-    (when-not vr
-      (throw (IllegalArgumentException. (str "Don't recognize " sym))))
-    `(do
-       (def ~n @~vr)
-       (alter-meta! (var ~n) assoc
-                    :doc ~doc
-                    :file ~(:file m)
-                    :line ~(:line m))
-       ~vr)))
+  ([sym]
+     `(import-def ~sym nil))
+  ([sym name]
+     (let [vr (resolve sym)
+           m (meta vr)
+           n (or name (:name m))
+           n (if (:dynamic m) (with-meta n {:dynamic true}) n)
+           nspace (:ns m)]
+       (when-not vr
+         (throw (IllegalArgumentException. (str "Don't recognize " sym))))
+       `(do
+          (def ~n @~vr)
+          (alter-meta! (var ~n) assoc
+            ~@(apply concat (dissoc m :name)))
+          ~vr))))
 
 (defmacro import-vars
   "Imports a list of vars from other namespaces."

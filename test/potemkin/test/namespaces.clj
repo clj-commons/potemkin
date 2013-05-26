@@ -21,6 +21,7 @@
 (import-fn i/multi-arity-fn)
 (import-fn i/multi-arity-fn alt-name)
 (import-fn i/protocol-function)
+(import-fn i/inlined-fn)
 
 (defn drop-lines [n s]
   (->> s str/split-lines (drop n) (interpose "\n") (apply str)))
@@ -38,6 +39,8 @@
   (is (rest-out= (doc i/multi-arity-macro) (doc alt-macro-name))))
 
 (deftest test-import-fn
+  (is (= 1 (inlined-fn 1)))
+  (is (= 1 (apply inlined-fn [1])))
   (is (out= (source i/multi-arity-fn) (source multi-arity-fn)))
   (is (rest-out= (doc i/multi-arity-fn) (doc multi-arity-fn)))
   (is (out= (source i/multi-arity-fn) (source alt-name)))

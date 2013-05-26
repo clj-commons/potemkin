@@ -20,3 +20,9 @@
   "I am described."
   ([a])
   ([a b]))
+
+(defn inlined-fn
+  "Faster than the average invocation."
+  {:inline (fn [x] x)}
+  [x]
+  x)
