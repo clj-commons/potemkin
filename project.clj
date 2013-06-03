@@ -9,7 +9,7 @@
              :1.4 {:dependencies [[org.clojure/clojure "1.4.0"]]}
              :1.6 {:dependencies [[org.clojure/clojure "1.6.0-master-SNAPSHOT"]]}}
   :warn-on-reflection true
-  :aliases {"all" ["with-profile" "1.2,dev:1.3,dev:dev:1.4,dev:1.6,dev"]}
+  :aliases {"all" ["with-profile" "dev,1.2:dev,1.3:dev,1.4:dev:dev,1.6"]}
   :test-selectors {:default #(not (some #{::benchmark}
                                         (cons (:tag %) (keys %))))
                    :benchmark :benchmark
