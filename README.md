@@ -42,6 +42,19 @@ For instance, here's a map which will automatically realize any delays, allowing
     (keys m))))
 ```
 
+### `def-derived-map`
+
+Often a map is just a view onto another object, especially when dealing with Java APIs.  While we can create a function which converts it into an entirely separate object, for both performance and memory reasons it can be useful to create a map which simply acts as a delegate to the underlying objects:
+
+```clj
+(def-derived-map StringProperties [^String s]
+  :base s
+  :lower-case (.toLowerCase s)
+  :upper-case (.toUpperCase s))
+```
+
+Each time the key `:lower-case` is looked up, it will invoke `.toLowerCase.  The resulting datatype behaves exactly like a normal Clojure map; new keys can be added and derived keys can be removed.
+
 ### `def-abstract-type` and `deftype+`
 
 The reason it's so laborious to define a map-like data structure is because the implementation cannot be shared between different types.  For instance, `clojure.lang.ISeq` has both `next` and `more` methods.  However, while `more` can be implemented in terms of `next`, as it is in [clojure.lang.ASeq](https://github.com/clojure/clojure/blob/master/src/jvm/clojure/lang/ASeq.java#L129), within Clojure it must be reimplemented anew for each new type.

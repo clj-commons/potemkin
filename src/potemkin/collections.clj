@@ -1,17 +1,17 @@
 (ns potemkin.collections
   (:use
     [clojure.walk]
-    [potemkin types macros])
-  (:import
-    java.util.Map$Entry
-    clojure.lang.MapEntry
-    clojure.lang.IPersistentVector))
+    [potemkin types macros]))
 
 (defprotocol PotemkinMap
   (get* [m k default])
   (assoc* [m k v])
   (dissoc* [m k])
   (keys* [m]))
+
+(defprotocol PotemkinMeta
+  (meta-atom [_])
+  (with-meta-atom [_ x]))
 
 (defn throw-arity [actual]
   `(throw
@@ -46,7 +46,6 @@
                           ~@(map (fn [arg] `(nth args## ~arg)) (range n)))])
                  (range 0 21))))))))
 
-
 (def-abstract-type AbstractMap
 
   potemkin.collections.PotemkinMap
@@ -72,7 +71,7 @@
 
   clojure.lang.Seqable
   (seq [this]
-    (map #(MapEntry. % (.valAt this % nil)) (potemkin.collections/keys* this)))
+    (map #(clojure.lang.MapEntry. % (.valAt this % nil)) (potemkin.collections/keys* this)))
 
   ^{:min-version "1.4.0"}
   clojure.core.protocols.CollReduce
@@ -178,19 +177,35 @@
         classname (with-meta (symbol (str (namespace-munge *ns*) "." name)) (meta name))]
     (unify-gensyms
       `(do
-         (import
-           java.util.Map$Entry
-           clojure.lang.MapEntry
-           clojure.lang.IPersistentVector)
          (deftype+ ~name ~params ~'potemkin.collections/AbstractMap
            ~@(map
                #(if (sequential? %)
                   (list* (get fns (first %) (first %)) (rest %))
                   %)
                body))
-         (defmethod print-method ~classname [o# ~(with-meta `w## {:tag "java.io.Writer"})]
-           (.write w## (str o#)))
          ~classname))))
+
+(defmacro reify-map-type
+  "Like reify, but must contain definitions for the following functions:
+
+   (get [this key default-value])
+   (assoc [this key value])
+   (dissoc [this key])
+   (keys [this])
+
+   All other necessary functions will be defined so that this behaves like a normal
+   Clojure map.  These can be overriden, if desired."
+  [& body]
+  (let [fns '{get get*
+              assoc assoc*
+              dissoc dissoc*
+              keys keys*}]
+    `(reify+ ~'potemkin.collections/AbstractMap
+       ~@(map
+           #(if (sequential? %)
+              (list* (get fns (first %) (first %)) (rest %))
+              %)
+           body))))
 
 (defmacro def-derived-map
   "Allows a map type to be defined where key-value pairs may be derived from fields.

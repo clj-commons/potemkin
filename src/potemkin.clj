@@ -32,6 +32,7 @@
   [potemkin.types
 
    def-abstract-type
+   reify+
    defprotocol+
    deftype+
    defrecord+
@@ -39,6 +40,7 @@
 
   [potemkin.collections
 
+   reify-map-type
    def-derived-map
    def-map-type])
 

@@ -255,6 +255,16 @@
 
       body)))
 
+(defmacro reify+
+  "A reify that supports abstract types."
+  [& body]
+  (let [body (->> (list* 'deftype (gensym "reify") [] 'potemkin.types.PotemkinType body)
+               clean-deftype
+               expand-deftype
+               deftype*->deftype)]
+    
+    `(reify ~@(drop 3 body))))
+
 ;;;
 
 (defmacro defrecord+
