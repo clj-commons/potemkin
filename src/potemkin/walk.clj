@@ -24,4 +24,3 @@
   "Like `clojure.walk/prewalk`, but preserves metadata."
   [f form]
   (walk (partial prewalk f) identity (f form)))
-

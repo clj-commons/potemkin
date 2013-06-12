@@ -6,7 +6,7 @@
 ;;   the terms of this license.
 ;;   You must not remove this notice, or any other, from this software.
 
-(ns potemkin.test.namespaces
+(ns potemkin.namespaces-test
   (:use
     potemkin
     clojure.test
@@ -14,7 +14,7 @@
   (:require
     [clojure.repl :as repl]
     [clojure.string :as str]
-    [potemkin.test.imports :as i]))
+    [potemkin.imports-test :as i]))
 
 (import-macro i/multi-arity-macro)
 (import-macro i/multi-arity-macro alt-macro-name)

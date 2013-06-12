@@ -6,7 +6,7 @@
 ;;   the terms of this license.
 ;;   You must not remove this notice, or any other, from this software.
 
-(ns potemkin.test.imports)
+(ns potemkin.imports-test)
 
 (defn multi-arity-fn
   "Here is a doc-string."

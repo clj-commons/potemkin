@@ -138,12 +138,14 @@
    [#"/"    "_SLASH_"]])
 
 (defn munge-fn-name [n]
-  (symbol
-    (reduce
-      (fn [s [regex replacement]]
-        (str/replace s regex replacement))
-      (name n)
-      clojure-fn-subs)))
+  (with-meta
+    (symbol
+      (reduce
+        (fn [s [regex replacement]]
+          (str/replace s regex replacement))
+        (name n)
+        clojure-fn-subs))
+    (meta n)))
 
 (defn resolve-tag [n]
   (if-let [tag (-> n meta :tag)]
@@ -178,6 +180,7 @@
                               arg-lists)))
                         body)
         class-name (str/replace (str *ns* "." name) #"\-" "_")]
+
     `(when-let [p# ~(if (try
                           (Class/forName class-name)
                           true
@@ -198,33 +201,33 @@
            (fn [[fn-name & arg-lists+doc-string]]
              (let [arg-lists (remove string? arg-lists+doc-string)
                    doc-string (filter string? arg-lists+doc-string)
-                   ]
+                   form-fn `(fn
+                              ~@(map
+                                  (fn [args]
+                                    (let [args (map untag args)]
+                                      `(
+                                        ;; args
+                                        ~(vec args)
+
+                                        ;; let form so we can type-hint the object
+                                        (list 'let
+                                          (vector
+                                            (with-meta `x## {:tag ~class-name})
+                                            ~(first args))
+                                          (list
+                                            '~(symbol (str "." (munge-fn-name fn-name)))
+                                            `x##
+                                            ~@(rest args))))))
+                                  arg-lists))]
+               
                (unify-gensyms
                  `(defn ~fn-name
                     ~@doc-string
-                    {:inline
-                     (fn
-                       ~@(map
-                           (fn [args]
-                             `(~(vec (map untag args))
-                               (list 'let
-                                 (vector
-                                   (with-meta `x## {:tag ~class-name})
-                                   ~(first args))
-                                 (list
-                                   '~(symbol (str "." (munge-fn-name fn-name)))
-                                   `x##
-                                   ~@(map untag (rest args))))))
-                           arg-lists))}
-                    ~@(map
-                        (fn [args]
-                          `(~(resolve-tag args)
-                            (~(symbol (str "." (munge-fn-name fn-name)))
-                             ~(with-meta
-                                (first args)
-                                {:tag class-name})
-                             ~@(map untag (rest args)))))
-                        arg-lists)))))
+                    {:inline ~form-fn}
+                    ~@(let [f (eval form-fn)]
+                        (map
+                          #(list (resolve-tag %) (apply f (map untag %)))
+                          arg-lists))))))
            body)
        
        p#)))

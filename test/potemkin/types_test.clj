@@ -6,7 +6,7 @@
 ;;   the terms of this license.
 ;;   You must not remove this notice, or any other, from this software.
 
-(ns potemkin.test.types
+(ns potemkin.types-test
   (:use
     [clojure test]
     [potemkin]))

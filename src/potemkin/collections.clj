@@ -115,7 +115,11 @@
 
   (entryAt [this k]
     (let [v (.valAt this k nil)]
-      (reify java.util.Map$Entry
+      (reify
+        java.util.Map$Entry
+        clojure.lang.IMapEntry
+        (key [_] k)
+        (val [_] v)
         (getKey [_] k)
         (getValue [_] v))))
   
