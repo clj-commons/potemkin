@@ -247,7 +247,8 @@
 
         classname (with-meta (symbol (str (namespace-munge *ns*) "." name)) (meta name))
 
-        prev-body (@type-bodies classname)]
+        prev-body (when (class? (ns-resolve *ns* name))
+                    (@type-bodies classname))]
     
     (when-not (and prev-body
                 (equivalent?
@@ -275,7 +276,8 @@
   [name & body]
   (let [classname (with-meta (symbol (str (namespace-munge *ns*) "." name)) (meta name))
 
-        prev-body (@type-bodies classname)]
+        prev-body (when (class? (ns-resolve *ns* name))
+                    (@type-bodies classname))]
     
     (when-not (and prev-body
                 (equivalent?
