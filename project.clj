@@ -1,4 +1,4 @@
-(defproject potemkin "0.3.0-SNAPSHOT"
+(defproject potemkin "0.3.0"
   :license {:name "Eclipse Public License - v 1.0"
             :url "http://www.eclipse.org/legal/epl-v10.html"
             :distribution :repo}

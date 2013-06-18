@@ -1,5 +1,11 @@
 Potemkin is a collection of facades and workarounds for things that are more difficult than they should be.  All functions are within the `potemkin` namespace.
 
+### usage
+
+```clj
+[potemkin "0.3.0"]
+```
+
 ### `import-vars`
 
 Clojure namespaces conflate the layout of your code and your API.  For larger libraries, this generally means that you either have large namespaces (e.g. clojure.core) or a large number of namespaces that have to be used in concert to accomplish non-trivial tasks (e.g. Ring).
