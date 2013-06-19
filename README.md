@@ -89,7 +89,9 @@ This abstract type may be used within the body of `deftype+`, which is just like
 
 ### `definterface+`
 
-Every method on a type must be defined within a protocol or an interface.  The standard practice is to use `defprotocol`, but this imposes a certain overhead in both [time and memory](https://gist.github.com/ztellman/5603216).  If you need the extensibility of protocols, then there isn't another option, but often interfaces suffice.  While `definterface` uses an entirely different convention than `defprotocol`, `definterface+` uses the same convention, and automatically defines inline-able functions which call into the interface.  Thus, any protocol which doesn't rely on the extensibility can be trivially turned into an interface, with all the inherent savings.
+Every method on a type must be defined within a protocol or an interface.  The standard practice is to use `defprotocol`, but this imposes a certain overhead in both [time and memory](https://gist.github.com/ztellman/5603216).  Furthermore, protocols don't support primitive arguments.  If you need the extensibility of protocols, then there isn't another option, but often interfaces suffice.  
+
+While `definterface` uses an entirely different convention than `defprotocol`, `definterface+` uses the same convention, and automatically defines inline-able functions which call into the interface.  Thus, any protocol which doesn't require the extensibility can be trivially turned into an interface, with all the inherent savings.
 
 ### `unify-gensyms`
 
@@ -97,9 +99,9 @@ Gensyms enforce hygiene within macros, but when quote syntax is nested, they can
 
 ```clj
 `(let [x# 1]
-  ~@(map 
-      (fn [n] `(+ x# ~n)) 
-      (range 3)))
+   ~@(map 
+       (fn [n] `(+ x# ~n)) 
+       (range 3)))
 ```
 
 Because `x#` is going to expand to a different gensym in the two different contexts.  One way to work around this is to explicitly create a gensym ourselves:
@@ -107,9 +109,9 @@ Because `x#` is going to expand to a different gensym in the two different conte
 ```clj
 (let [x-sym (gensym "x")]
   `(let [~x-sym 1]
-    ~@(map 
-        (fn [n] `(+ ~x-sym ~n)) 
-        (range 3))))
+     ~@(map 
+         (fn [n] `(+ ~x-sym ~n)) 
+         (range 3))))
 ```
 
 However, this is pretty tedious, since we may need to define quite a few of these explicit gensym names.  Using `unify-gensyms`, however, we can rely on the convention that any var with two hashes at the end should be unified:
@@ -117,9 +119,9 @@ However, this is pretty tedious, since we may need to define quite a few of thes
 ```clj
 (unify-gensyms
   `(let [x## 1]
-    ~@(map 
-        (fn [n] `(+ x## ~n)) 
-        (range 3)))
+     ~@(map 
+         (fn [n] `(+ x## ~n)) 
+         (range 3)))
 ```
 
 ### License
