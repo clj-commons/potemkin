@@ -32,12 +32,16 @@
   (is (= nil (eval '(potemkin/definterface+ IBar (bar-baz [x y z]))))))
 
 (definterface+ ITest
-  (test-fn ^long [_ ^long x]))
+  (test-fn ^long [_ ^long x])
+  (self [_]))
 
 (deftype+ TestType [^long n]
   ITest
-  (test-fn [_ x] (+ n x)))
+  (test-fn [_ x] (+ n x))
+  (self [this] this))
 
 (deftest test-primitive-interface
-  (is (= 6 (test-fn (TestType. 1) 5)))
-  (is (= 6 (apply test-fn (TestType. 1) [5]))))
+  (is (= 6
+        (test-fn (TestType. 1) 5)
+        (apply test-fn (TestType. 1) [5])
+        (test-fn (self (self (TestType. 1))) (test-fn (TestType. 1) 4)))))

@@ -126,4 +126,6 @@ However, this is pretty tedious, since we may need to define quite a few of thes
 
 ### License
 
+Copyright © 2013 Zachary Tellman
+
 Distributed under the [MIT License](http://opensource.org/licenses/MIT).  This means that pieces of this library may be copied into other libraries if they don't wish to have this as an explicit dependency, as long as it is credited within the code.

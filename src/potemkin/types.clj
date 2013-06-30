@@ -1,7 +1,7 @@
 (ns potemkin.types
   (:use
     [clojure walk [set :only (union)]]
-    [potemkin.macros :only (equivalent? normalize-gensyms safe-resolve unify-gensyms)])
+    [potemkin.macros :only (equivalent? normalize-gensyms safe-resolve unify-gensyms macroexpand+)])
   (:require
     [clojure.string :as str]))
 
@@ -209,15 +209,12 @@
                                         ;; args
                                         ~(vec args)
 
-                                        ;; let form so we can type-hint the object
-                                        (list 'let
-                                          (vector
-                                            (with-meta `x## {:tag ~class-name})
-                                            ~(first args))
+                                        (with-meta
                                           (list
                                             '~(symbol (str "." (munge-fn-name fn-name)))
-                                            `x##
-                                            ~@(rest args))))))
+                                            (with-meta (macroexpand+ ~(first args)) {:tag ~class-name})
+                                            ~@(rest args))
+                                          {:tag ~(-> args meta :tag)}))))
                                   arg-lists))]
                
                (unify-gensyms

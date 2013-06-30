@@ -1,6 +1,14 @@
 (ns potemkin.macros
   (:use [potemkin.walk]))
 
+(defn macroexpand+
+  "Expands both macros and inline functions."
+  [x]
+  (let [x* (macroexpand x)]
+    (if-let [inline-fn (and (= x x*) (seq? x) (-> x first resolve meta :inline))]
+      (apply inline-fn (rest x))
+      x*)))
+
 (defn safe-resolve [x]
   (try
     (resolve x)

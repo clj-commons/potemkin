@@ -21,6 +21,7 @@
 
   [potemkin.macros
 
+   macroexpand+
    unify-gensyms
    normalize-gensyms
    equivalent?
