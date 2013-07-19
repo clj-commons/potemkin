@@ -37,7 +37,8 @@
    defprotocol+
    deftype+
    defrecord+
-   definterface+]
+   definterface+
+   extend-protocol+]
 
   [potemkin.collections
 

@@ -45,3 +45,24 @@
         (test-fn (TestType. 1) 5)
         (apply test-fn (TestType. 1) [5])
         (test-fn (self (self (TestType. 1))) (test-fn (TestType. 1) 4)))))
+
+(defprotocol+ Foo
+  (foo [_]))
+
+(defprotocol+ Bar
+  (bar [_]))
+
+(extend-protocol+ Foo
+  ITest
+  (foo [this] (self this))
+
+  Bar
+  (foo [this] (bar this)))
+
+(extend-protocol+ Bar
+  Foo
+  (bar [this] (foo this)))
+
+(deftest test-extend-protocol+
+  (is (= 1 (test-fn (foo (TestType. 1)) 0)))
+  (is (= 1 (test-fn (bar (TestType. 1)) 0))))

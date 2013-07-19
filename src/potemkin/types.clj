@@ -3,11 +3,67 @@
     [clojure walk [set :only (union)]]
     [potemkin.macros :only (equivalent? normalize-gensyms safe-resolve unify-gensyms macroexpand+)])
   (:require
+    [clojure.set :as set]
     [clojure.string :as str]))
 
 ;;;
 
 (definterface PotemkinType)
+
+;;;
+
+(defn protocol? [x]
+  (and
+    (contains? x :on-interface)
+    (class? (:on-interface x))))
+
+(defn- extend-implementations [proto impls body]
+  (let [proto-val @(resolve proto)
+        impls (remove
+                #(or
+                   (= (:on-interface proto-val) %)
+                   (contains? (:impls proto-val) %))
+                impls)]
+    (eval
+      `(extend-protocol ~proto
+         ~@(apply concat
+             (interleave (map list impls) (repeat body)))))))
+
+(defn- register-impl-callback [proto-var callback]
+  (add-watch proto-var callback
+    (fn [_ proto-var {old-impls :impls} {new-impls :impls}]
+      (callback (set/difference (set (keys new-impls)) (set (keys old-impls)))))))
+
+(defmacro extend-protocol+
+  "A variant of `extend-protocol` that allows `proto` to be extended over other protocols, as well as classes and `nil`."
+  [proto & body]
+  (let [split-on-symbol (fn this [[sym & rest :as s]]
+                          (when-not (empty? s)
+                            (lazy-seq
+                              (cons
+                                (cons sym (take-while (complement symbol?) rest))
+                                (this (drop-while (complement symbol?) rest))))))
+        decls (split-on-symbol body)
+        protocol? (fn [[sym]]
+                    (let [x (resolve sym)]
+                      (and (var? x) (protocol? @x))))
+        protos (filter protocol? decls)
+        classes (remove protocol? decls)]
+
+    (doseq [[target-proto & body] protos]
+      (let [target-proto-var (resolve target-proto)]
+
+        ;; all future implementations should be extended
+        (register-impl-callback target-proto-var
+          (fn [new-impls]
+            (extend-implementations proto new-impls body)))
+
+        ;; all current implementations should be extended
+        (let [{:keys [on-interface impls]} @target-proto-var]
+          (extend-implementations proto (cons on-interface (keys impls)) body))))
+    
+    `(extend-protocol ~proto
+       ~@(apply concat classes))))
 
 ;;;
 
@@ -18,8 +74,6 @@
       #(when-let [min-version (-> % meta :min-version)]
          (neg? (.compareTo version min-version)))
       x)))
-
-;;;
 
 (declare merge-deftypes* deftype->deftype*)
 

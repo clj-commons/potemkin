@@ -5,8 +5,17 @@
   "Expands both macros and inline functions."
   [x]
   (let [x* (macroexpand x)]
-    (if-let [inline-fn (and (= x x*) (seq? x) (-> x first resolve meta :inline))]
-      (apply inline-fn (rest x))
+    (if-let [inline-fn (and (seq? x*)
+                         (symbol? (first x*))
+                         (not (-> x* meta ::transformed))
+                         (-> x first resolve meta :inline))]
+      (let [x** (apply inline-fn (rest x*))]
+        (recur
+          ;; unfortunately, static function calls can look a lot like what we just
+          ;; expanded, so prevent infinite expansion
+          (if (= '. (first x**))
+            (concat (butlast x**) [(with-meta (last x**) {::transformed true})])
+            x**)))
       x*)))
 
 (defn safe-resolve [x]

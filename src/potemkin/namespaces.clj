@@ -1,6 +1,14 @@
 (ns potemkin.namespaces
   (:use [clojure pprint]))
 
+(defn link-vars
+  "Makes sure that all changes to `src` are reflected in `dst`."
+  [src dst]
+  (add-watch src dst
+    (fn [_ src old new]
+      (alter-var-root dst (constantly src))
+      (alter-meta! dst merge (dissoc (meta src) :name)))))
+
 (defmacro import-fn
   "Given a function in another namespace, defines a function with the
    same name in the current namespace.  Argument lists, doc-strings,
@@ -18,11 +26,11 @@
        (when (:macro m)
          (throw (IllegalArgumentException.
                   (str "Calling import-fn on a macro: " sym))))
+       
        `(do
           (def ~(with-meta n {:protocol protocol}) (deref ~vr))
-          (alter-meta! (var ~n) assoc
-            :arglists ~(list 'quote arglists)
-            ~@(apply concat (dissoc m :arglists :name)))
+          (alter-meta! (var ~n) merge (dissoc (meta ~vr) :name))
+          (link-vars ~vr (var ~n))
           ~vr))))
 
 (defmacro import-macro
@@ -43,10 +51,9 @@
                   (str "Calling import-macro on a non-macro: " sym))))
        `(do
           (def ~n ~(resolve sym))
-          (alter-meta! (var ~n) assoc
-            :arglists ~(list 'quote arglists)
-            ~@(apply concat (dissoc m :arglists :name)))
+          (alter-meta! (var ~n) merge (dissoc (meta ~vr) :name))
           (.setMacro (var ~n))
+          (link-vars ~vr (var ~n))
           ~vr))))
 
 (defmacro import-def
@@ -64,8 +71,8 @@
          (throw (IllegalArgumentException. (str "Don't recognize " sym))))
        `(do
           (def ~n @~vr)
-          (alter-meta! (var ~n) assoc
-            ~@(apply concat (dissoc m :name)))
+          (alter-meta! (var ~n) merge (dissoc (meta ~vr) :name))
+          (link-vars ~vr (var ~n))
           ~vr))))
 
 (defmacro import-vars
