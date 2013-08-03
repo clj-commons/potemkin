@@ -1,4 +1,4 @@
-(defproject potemkin "0.3.2-SNAPSHOT"
+(defproject potemkin "0.3.2"
   :license {:name "Eclipse Public License - v 1.0"
             :url "http://www.eclipse.org/legal/epl-v10.html"
             :distribution :repo}
@@ -8,7 +8,7 @@
              :1.3 {:dependencies [[org.clojure/clojure "1.3.0"]]}
              :1.4 {:dependencies [[org.clojure/clojure "1.4.0"]]}
              :1.6 {:dependencies [[org.clojure/clojure "1.6.0-master-SNAPSHOT"]]}}
-  :warn-on-reflection true
+  :global-vars {*warn-on-reflection* true}
   :aliases {"all" ["with-profile" "dev,1.2:dev,1.3:dev,1.4:dev:dev,1.6"]}
   :test-selectors {:default #(not (some #{::benchmark}
                                         (cons (:tag %) (keys %))))
