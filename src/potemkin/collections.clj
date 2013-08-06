@@ -221,7 +221,7 @@
      :lower-case (.toLowerCase s)
      :upper-case (.toUpperCase s))
 
-   The resulting map will be have correctly if the defined keys are removed, shadowed,
+   The resulting map will behave correctly if the defined keys are removed, shadowed,
    etc.
 
    The above class will automatically create a constructor named '->StringMap'."
