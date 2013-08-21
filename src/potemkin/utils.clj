@@ -101,7 +101,7 @@
          v#))))
 
 (defn fast-memoize
-  "A version of `memoize` which is "
+  "A version of `memoize` which has equivalent behavior but is ~4x faster."
   [f]
   (let [m (atom (HashMap.))]
     (fn
