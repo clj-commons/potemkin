@@ -8,7 +8,7 @@
 
 (ns potemkin
   (:require
-    [potemkin namespaces types collections macros]))
+    [potemkin namespaces types collections macros utils]))
 
 (potemkin.namespaces/import-vars potemkin.namespaces/import-vars) ;; totally meta
 
@@ -24,11 +24,14 @@
    macroexpand+
    unify-gensyms
    normalize-gensyms
-   equivalent?
+   equivalent?]
+
+  [potemkin.utils
    condp-case
    try*
    fast-bound-fn
-   fast-bound-fn*]
+   fast-bound-fn*
+   fast-memoize]
 
   [potemkin.types
 
@@ -42,6 +45,7 @@
 
   [potemkin.collections
 
+   tuple
    reify-map-type
    def-derived-map
    def-map-type])
