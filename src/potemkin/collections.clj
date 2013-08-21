@@ -283,7 +283,6 @@
          clojure.lang.IPersistentCollection
          clojure.lang.Indexed
          clojure.lang.Seqable
-         clojure.lang.IHashEq
          java.util.RandomAccess
          
          (nth [_# idx# not-found#]
@@ -330,6 +329,10 @@
                      `(unchecked-add (unchecked-multiply 31 ~form) (unchecked-long (if (nil? ~x) 0 (.hashCode ~x))))))
                 1
                 fields)))
+
+         ^{:min-version "1.4.0"}
+         clojure.lang.IHashEq
+         ^{:min-version "1.4.0"}
          (hasheq [_]
            ~(if (zero? cardinality)
               0
@@ -341,6 +344,7 @@
                      `(unchecked-add (unchecked-multiply 31 ~form) (clojure.lang.Util/hasheq ~x))))
                 1
                 fields)))
+         
          (seq [_]
            ~(when-not (zero? cardinality)
               `(list ~@fields)))))))
