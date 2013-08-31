@@ -6,11 +6,10 @@
   :dependencies [[clj-tuple "0.1.2"]]
   :profiles {:dev {:dependencies [[org.clojure/clojure "1.5.1"]
                                   [criterium "0.4.1"]]}
-             :1.3 {:dependencies [[org.clojure/clojure "1.3.0"]]}
              :1.4 {:dependencies [[org.clojure/clojure "1.4.0"]]}
              :1.6 {:dependencies [[org.clojure/clojure "1.6.0-master-SNAPSHOT"]]}}
   :global-vars {*warn-on-reflection* true}
-  :aliases {"all" ["with-profile" "dev,1.2:dev,1.3:dev,1.4:dev:dev,1.6"]}
+  :aliases {"all" ["with-profile" "dev,1.4:dev:dev,1.6"]}
   :test-selectors {:default #(not (some #{:benchmark}
                                         (cons (:tag %) (keys %))))
                    :benchmark :benchmark
