@@ -1,9 +1,10 @@
 (ns potemkin.utils
   (:use
-    [potemkin macros collections])
+    [potemkin macros collections]
+    [clj-tuple])
   (:import
-    [java.util
-     HashMap]))
+    [java.util.concurrent
+     ConcurrentHashMap]))
 
 (defmacro fast-bound-fn
   "Creates a variant of bound-fn which doesn't assume you want a merged
@@ -89,21 +90,18 @@
   `(let [x# ~x]
      (if (nil? x#) ::nil x#)))
 
-(defn add! [^HashMap m k v]
-  (doto (HashMap. m) (.put k v)))
-
 (defmacro memoize-form [m f & args]
   `(let [k# (tuple ~@args)]
-     (if-let [v# (.get ^HashMap (deref ~m) k#)]
-       (re-nil v#)
-       (let [v# (de-nil (~f ~@args))]
-         (swap! ~m add! k# v#)
-         v#))))
+     (let [v# (.get ~m k#)]
+       (if-not (nil? v#)
+         (re-nil v#)
+         (let [v# (de-nil (~f ~@args))]
+           (or (.putIfAbsent ~m k# v#) v#))))))
 
 (defn fast-memoize
-  "A version of `memoize` which has equivalent behavior but is ~4x faster."
+  "A version of `memoize` which has equivalent behavior, but is faster."
   [f]
-  (let [m (atom (HashMap.))]
+  (let [m (ConcurrentHashMap.)]
     (fn
       ([]
          (memoize-form m f))
@@ -115,10 +113,14 @@
          (memoize-form m f x y z))
       ([x y z w]
          (memoize-form m f x y z w))
-      ([x y z w & rest]
-         (let [k (apply vector x y z w rest)]
-           (if-let [v (.get ^HashMap (deref m) k)]
-             (re-nil v)
-             (let [v (de-nil (apply f k))]
-               (swap! m add! k v)
-               v)))))))
+      ([x y z w u]
+         (memoize-form m f x y z w u))
+      ([x y z w u v]
+         (memoize-form m f x y z w u v))
+      ([x y z w u v & rest]
+         (let [k (list* x y z w u v rest)]
+           (let [v (.get ^ConcurrentHashMap m k)]
+             (if-not (nil? v)
+               (re-nil v)
+               (let [v (de-nil (apply f k))]
+                 (or (.putIfAbsent m k v) v)))))))))

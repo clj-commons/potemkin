@@ -3,6 +3,7 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"
             :distribution :repo}
   :description "Some useful facades."
+  :dependencies [[clj-tuple "0.1.2"]]
   :profiles {:dev {:dependencies [[org.clojure/clojure "1.5.1"]
                                   [criterium "0.4.1"]]}
              :1.3 {:dependencies [[org.clojure/clojure "1.3.0"]]}

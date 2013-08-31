@@ -27,6 +27,7 @@
    equivalent?]
 
   [potemkin.utils
+   
    condp-case
    try*
    fast-bound-fn
@@ -45,7 +46,6 @@
 
   [potemkin.collections
 
-   tuple
    reify-map-type
    def-derived-map
    def-map-type])
