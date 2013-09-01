@@ -3,7 +3,7 @@ Potemkin is a collection of facades and workarounds for things that are more dif
 ### usage
 
 ```clj
-[potemkin "0.3.0"]
+[potemkin "0.3.3"]
 ```
 
 ### `import-vars`
@@ -123,6 +123,10 @@ However, this is pretty tedious, since we may need to define quite a few of thes
          (fn [n] `(+ x## ~n)) 
          (range 3)))
 ```
+
+### `fast-bound-fn` and `fast-memoize`
+
+Variants of Clojure's `bound-fn` and `fast-memoize` which are significantly faster.
 
 ### License
 
