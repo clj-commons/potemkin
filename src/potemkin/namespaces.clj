@@ -1,5 +1,4 @@
-(ns potemkin.namespaces
-  (:use [clojure pprint]))
+(ns potemkin.namespaces)
 
 (defn link-vars
   "Makes sure that all changes to `src` are reflected in `dst`."

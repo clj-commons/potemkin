@@ -1,8 +1,9 @@
 (ns potemkin.types
   (:use
-    [clojure walk [set :only (union)]]
-    [potemkin.macros :only (equivalent? normalize-gensyms safe-resolve unify-gensyms macroexpand+)])
+    [clojure [set :only (union)]]
+    [potemkin.macros :only (equivalent? normalize-gensyms safe-resolve unify-gensyms)])
   (:require
+    [riddley.walk :as r]
     [clojure.set :as set]
     [clojure.string :as str]))
 
@@ -107,18 +108,17 @@
 
 (defn transform-deftype*
   [f x]
-  (prewalk
-    #(if (and (sequential? %) (symbol? (first %)) (= "deftype*" (name (first %))))
-       (f %)
-       %)
-    (macroexpand x)))
+  (r/walk-exprs
+    #(and (sequential? %) (= 'deftype* (first %)))
+    f
+    x))
 
 (defn deftype->deftype* [x]
-  (let [x (macroexpand x)
+  (let [x (r/macroexpand x)
         find-deftype* (fn find-deftype* [x]
                         (when (sequential? x)
                           (let [f (first x)]
-                            (if (and (symbol? f) (= "deftype*" (name f)))
+                            (if (= 'deftype* f)
                               x
                               (first (filter find-deftype* x))))))
         remove-nil-implements (fn [x]
@@ -175,7 +175,7 @@
   (let [prev-body (-> name resolve meta :potemkin/body)]
     (when-not (equivalent? prev-body body)
       `(let [p# (defprotocol ~name ~@body)]
-         (alter-meta! (resolve p#) assoc :potemkin/body '~(prewalk macroexpand body))
+         (alter-meta! (resolve p#) assoc :potemkin/body '~(r/macroexpand-all body))
          p#))))
 
 ;;;
@@ -266,7 +266,7 @@
                                         (with-meta
                                           (list
                                             '~(symbol (str "." (munge-fn-name fn-name)))
-                                            (with-meta (macroexpand+ ~(first args)) {:tag ~class-name})
+                                            (with-meta (r/macroexpand ~(first args)) {:tag ~class-name})
                                             ~@(rest args))
                                           {:tag ~(-> args meta :tag)}))))
                                   arg-lists))]
@@ -305,8 +305,8 @@
                 (equivalent?
                   (transform-deftype* #(drop 3 %) prev-body)
                   (transform-deftype* #(drop 3 %) body)))
-      
-      (swap! type-bodies assoc classname (prewalk macroexpand body))
+      (swap! type-bodies assoc classname
+        (r/macroexpand-all body))
 
       body)))
 
@@ -335,7 +335,7 @@
                   body
                   prev-body))
       
-      (swap! type-bodies assoc classname (prewalk macroexpand body))
+      (swap! type-bodies assoc classname (r/macroexpand-all body))
       
       `(defrecord ~name ~@body))))
 

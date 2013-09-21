@@ -1,6 +1,5 @@
 (ns potemkin.collections
   (:use
-    [clojure.walk]
     [potemkin types macros]))
 
 (defprotocol PotemkinMap

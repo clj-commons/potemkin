@@ -12,7 +12,7 @@
             (coll? form) (outer (into (empty form) (map inner form)))
             :else (outer form))]
     (if (instance? clojure.lang.IObj x)
-      (with-meta x (meta form))
+      (with-meta x (merge (meta form) (meta x)))
       x)))
 
 (defn postwalk

@@ -1,22 +1,7 @@
 (ns potemkin.macros
-  (:use [potemkin.walk]))
-
-(defn macroexpand+
-  "Expands both macros and inline functions."
-  [x]
-  (let [x* (macroexpand x)]
-    (if-let [inline-fn (and (seq? x*)
-                         (symbol? (first x*))
-                         (not (-> x* meta ::transformed))
-                         (-> x first resolve meta :inline))]
-      (let [x** (apply inline-fn (rest x*))]
-        (recur
-          ;; unfortunately, static function calls can look a lot like what we just
-          ;; expanded, so prevent infinite expansion
-          (if (= '. (first x**))
-            (concat (butlast x**) [(with-meta (last x**) {::transformed true})])
-            x**)))
-      x*)))
+  (:require
+    [potemkin.walk :refer (postwalk)]
+    [riddley.walk :as r]))
 
 (defn safe-resolve [x]
   (try
@@ -67,8 +52,8 @@
   (if-not (and a b)
     (= a b)
     (=
-      (->> a (map (partial prewalk macroexpand)) normalize-gensyms)
-      (->> b (map (partial prewalk macroexpand)) normalize-gensyms))))
+      (->> a r/macroexpand-all normalize-gensyms)
+      (->> b r/macroexpand-all normalize-gensyms))))
 
 
 
