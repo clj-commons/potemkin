@@ -113,14 +113,9 @@
     (contains? (.keySet this) k))
 
   (entryAt [this k]
-    (let [v (.valAt this k nil)]
-      (reify
-        java.util.Map$Entry
-        clojure.lang.IMapEntry
-        (key [_] k)
-        (val [_] v)
-        (getKey [_] k)
-        (getValue [_] v))))
+    (let [v (.valAt this k ::not-found)]
+      (when (not= v ::not-found)
+        (clojure.lang.MapEntry. k v))))
   
   (assoc [this k v]
     (potemkin.collections/assoc* this k v))
