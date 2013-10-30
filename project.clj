@@ -1,10 +1,8 @@
 (defproject potemkin "0.3.4"
-  :license {:name "Eclipse Public License - v 1.0"
-            :url "http://www.eclipse.org/legal/epl-v10.html"
-            :distribution :repo}
+  :license {:name "MIT License"}
   :description "Some useful facades."
   :dependencies [[clj-tuple "0.1.2"]
-                 [riddley "0.1.5-SNAPSHOT"]]
+                 [riddley "0.1.5"]]
   :profiles {:dev {:dependencies [[org.clojure/clojure "1.5.1"]
                                   [criterium "0.4.1"]
                                   [collection-check "0.1.1-SNAPSHOT"]]}
