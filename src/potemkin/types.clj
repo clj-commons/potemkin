@@ -300,11 +300,11 @@
 
         prev-body (when (class? (ns-resolve *ns* name))
                     (@type-bodies classname))]
-    
+
     (when-not (and prev-body
                 (equivalent?
-                  (transform-deftype* #(drop 3 %) prev-body)
-                  (transform-deftype* #(drop 3 %) body)))
+                  (transform-deftype* identity prev-body)
+                  (transform-deftype* identity body)))
       (swap! type-bodies assoc classname
         (r/macroexpand-all body))
 

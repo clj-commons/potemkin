@@ -6,7 +6,8 @@
   :dependencies [[clj-tuple "0.1.2"]
                  [riddley "0.1.5-SNAPSHOT"]]
   :profiles {:dev {:dependencies [[org.clojure/clojure "1.5.1"]
-                                  [criterium "0.4.1"]]}
+                                  [criterium "0.4.1"]
+                                  [collection-check "0.1.1-SNAPSHOT"]]}
              :1.4 {:dependencies [[org.clojure/clojure "1.4.0"]]}
              :1.6 {:dependencies [[org.clojure/clojure "1.6.0-master-SNAPSHOT"]]}}
   :global-vars {*warn-on-reflection* true}

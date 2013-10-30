@@ -3,6 +3,7 @@
     [potemkin types macros]))
 
 (defprotocol PotemkinMap
+  (empty* [m])
   (get* [m k default])
   (assoc* [m k v])
   (dissoc* [m k])
@@ -70,7 +71,10 @@
 
   clojure.lang.Seqable
   (seq [this]
-    (map #(clojure.lang.MapEntry. % (.valAt this % nil)) (potemkin.collections/keys* this)))
+    (seq
+      (map
+        #(clojure.lang.MapEntry. % (.valAt this % nil))
+        (potemkin.collections/keys* this))))
 
   ^{:min-version "1.4.0"}
   clojure.core.protocols.CollReduce
@@ -119,6 +123,12 @@
   
   (assoc [this k v]
     (potemkin.collections/assoc* this k v))
+
+  (empty* [this]
+    {})
+
+  (empty [this]
+    (potemkin.collections/empty* this))
   
   java.util.Map
   (get [this k]
@@ -171,7 +181,8 @@
   (let [fns '{get get*
               assoc assoc*
               dissoc dissoc*
-              keys keys*}
+              keys keys*
+              empty empty*}
         classname (with-meta (symbol (str (namespace-munge *ns*) "." name)) (meta name))]
     (unify-gensyms
       `(do
@@ -197,7 +208,8 @@
   (let [fns '{get get*
               assoc assoc*
               dissoc dissoc*
-              keys keys*}]
+              keys keys*
+              empty empty*}]
     `(reify+ ~'potemkin.collections/AbstractMap
        ~@(map
            #(if (sequential? %)
