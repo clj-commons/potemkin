@@ -20,7 +20,7 @@
   :upper (.toUpperCase s))
 
 (defn test-basic-map-functionality [m]
-  (check/assert-map-like 1e4 m gen/keyword gen/pos-int))
+  (check/assert-map-like m gen/keyword gen/pos-int))
 
 (deftest test-maps
   (test-basic-map-functionality (SimpleMap. {}))
