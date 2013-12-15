@@ -18,3 +18,5 @@
   {:inline (fn [x] x)}
   [x]
   x)
+
+(def some-value 1)
