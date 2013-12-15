@@ -14,6 +14,7 @@
 (import-fn i/multi-arity-fn alt-name)
 (import-fn i/protocol-function)
 (import-fn i/inlined-fn)
+(import-def i/some-value)
 
 (defn drop-lines [n s]
   (->> s str/split-lines (drop n) (interpose "\n") (apply str)))
@@ -39,4 +40,7 @@
   (is (rest-out= (doc i/multi-arity-fn) (doc alt-name)))
   (is (rest-out= (doc i/protocol-function) (doc protocol-function))))
 
-
+(deftest test-points-to-the-value-after-reload
+  (is (= 1 some-value))
+  (require 'potemkin.imports-test :reload)
+  (is (= 1 some-value)))

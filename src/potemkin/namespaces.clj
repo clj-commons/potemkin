@@ -5,7 +5,7 @@
   [src dst]
   (add-watch src dst
     (fn [_ src old new]
-      (alter-var-root dst (constantly src))
+      (alter-var-root dst (constantly @src))
       (alter-meta! dst merge (dissoc (meta src) :name)))))
 
 (defmacro import-fn
@@ -25,7 +25,7 @@
        (when (:macro m)
          (throw (IllegalArgumentException.
                   (str "Calling import-fn on a macro: " sym))))
-       
+
        `(do
           (def ~(with-meta n {:protocol protocol}) (deref ~vr))
           (alter-meta! (var ~n) merge (dissoc (meta ~vr) :name))
