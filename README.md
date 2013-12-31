@@ -128,7 +128,7 @@ However, this is pretty tedious, since we may need to define quite a few of thes
 
 ### `fast-bound-fn` and `fast-memoize`
 
-Variants of Clojure's `bound-fn` and `fast-memoize` which are significantly faster.
+Variants of Clojure's `bound-fn` and `memoize` which are significantly faster.
 
 ### License
 
