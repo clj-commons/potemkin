@@ -76,7 +76,7 @@
                    ~expr)))
              (apply concat))
          :else
-         ~(when-not (even? (count cases))
+         ~(if-not (even? (count cases))
             `(throw (IllegalArgumentException. (str "no matching clause for " (pr-str val##))))
             (last cases))))))
 
