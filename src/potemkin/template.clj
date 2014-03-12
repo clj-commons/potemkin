@@ -90,6 +90,3 @@
                 :else
                 (list 'quote x))))
           body)))))
-
-(deftemplate plus-one [y] [x z]
-  (+ y x ~(inc z)))

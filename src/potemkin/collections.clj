@@ -18,24 +18,29 @@
      (RuntimeException.
        ~(str "Wrong number of args (" actual ")"))))
 
+(defmacro compile-if [test then else]
+  (if (eval test)
+    then
+    else))
+
 (eval
   (unify-gensyms
     `(def-abstract-type PotemkinFn
        java.util.concurrent.Callable
        (call [this##]
          (.invoke ~(with-meta `this## {:tag "clojure.lang.IFn"})))
-       
+
        java.lang.Runnable
        (run [this##]
          (.invoke ~(with-meta `this## {:tag "clojure.lang.IFn"})))
-       
+
        clojure.lang.IFn
        ~@(map
            (fn [n]
              `(~'invoke [this# ~@(repeat n '_)]
                 ~(throw-arity n)))
            (range 0 21))
-       
+
        (applyTo [this## args##]
          (let [cnt# (count args##)]
            (case cnt#
@@ -49,7 +54,7 @@
 (def-abstract-type AbstractMap
 
   potemkin.collections.PotemkinMap
-  
+
   clojure.lang.MapEquivalence
 
   clojure.lang.IPersistentCollection
@@ -89,11 +94,21 @@
     [this f val#]
     (reduce f val# (seq this)))
 
+  clojure.lang.IHashEq
+  (hasheq [this]
+    (potemkin.collections/compile-if (resolve 'clojure.core/hash-unordered-coll)
+      (hash-unordered-coll (or (seq this) ()))
+      (reduce
+        (fn [acc [k v]]
+          (unchecked-add acc (bit-xor (hash k) (hash v))))
+        0
+        (seq this))))
+
   Object
   (hashCode [this]
     (reduce
       (fn [acc [k v]]
-        (unchecked-add acc (bit-xor (hash k) (hash v))))
+        (unchecked-add acc (bit-xor (.hashCode k) (.hashCode v))))
       0
       (seq this)))
 
@@ -120,7 +135,7 @@
     (let [v (.valAt this k ::not-found)]
       (when (not= v ::not-found)
         (clojure.lang.MapEntry. k v))))
-  
+
   (assoc [this k v]
     (potemkin.collections/assoc* this k v))
 
@@ -129,7 +144,7 @@
 
   (empty [this]
     (potemkin.collections/empty* this))
-  
+
   java.util.Map
   (get [this k]
     (.valAt this k))
@@ -235,22 +250,22 @@
   (let [key-set (->> key-vals (partition 2) (map first) set)]
     (unify-gensyms
       `(do
-       
+
         (def-map-type ~name ~(vec (conj params `added## `removed##))
-         
+
           (~'get [this# key# default-value#]
             (cond
               (contains? added## key#)
               (get added## key#)
-           
+
               (contains? removed## key#)
               default-value#
-           
+
               :else
               (case key#
                 ~@key-vals
                 default-value#)))
-       
+
           (~'keys [this#]
             (let [keys# ~key-set
                   keys# (if-not (empty? removed##)
@@ -260,18 +275,18 @@
                           (set (concat keys# (keys added##)))
                           keys#)]
               keys#))
-       
+
           (~'assoc [this# key# value#]
             (new ~name ~@params (assoc added## key# value#) removed##))
-       
+
           (~'dissoc [this# key#]
             (cond
               (contains? added## key#)
               (new ~name ~@params (dissoc added## key#) removed##)
-           
+
               (contains? ~key-set key#)
               (new ~name ~@params added## (set (conj removed## key#)))
-           
+
               :else
               this#)))
 
