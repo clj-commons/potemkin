@@ -7,7 +7,9 @@
   (get* [m k default])
   (assoc* [m k v])
   (dissoc* [m k])
-  (keys* [m]))
+  (keys* [m])
+  (with-meta* [o mta])
+  (meta* [o]))
 
 (defprotocol PotemkinMeta
   (meta-atom [_])
@@ -68,7 +70,13 @@
       (if-let [[k v] (seq o)]
         (assoc this k v)
         this)))
-
+  
+  clojure.lang.IObj
+  (withMeta [this mta]
+    (potemkin.collections/with-meta* this mta))
+  (meta [this]
+        (potemkin.collections/meta* this))
+  
   clojure.lang.Counted
 
   (count [this]
@@ -197,7 +205,9 @@
               assoc assoc*
               dissoc dissoc*
               keys keys*
-              empty empty*}
+              empty empty*
+              with-meta with-meta*
+              meta meta*}
         classname (with-meta (symbol (str (namespace-munge *ns*) "." name)) (meta name))]
     (unify-gensyms
       `(do

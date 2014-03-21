@@ -6,11 +6,13 @@
     [collection-check :as check]
     [simple-check.generators :as gen]))
 
-(def-map-type SimpleMap [m]
+(def-map-type SimpleMap [m mta]
   (get [_ k d] (get m k d))
-  (assoc [_ k v] (SimpleMap. (assoc m k v)))
-  (dissoc [_ k] (SimpleMap. (dissoc m k)))
-  (keys [_] (keys m)))
+  (assoc [_ k v] (SimpleMap. (assoc m k v) mta))
+  (dissoc [_ k] (SimpleMap. (dissoc m k) mta))
+  (keys [_] (keys m))
+  (with-meta [_ mta] (SimpleMap. m mta))
+  (meta [_] mta))
 
 (def-derived-map SimpleDerivedMap [])
 
@@ -23,7 +25,10 @@
   (check/assert-map-like m gen/keyword gen/pos-int))
 
 (deftest test-maps
-  (test-basic-map-functionality (SimpleMap. {}))
+  (test-basic-map-functionality (->SimpleMap {} {}))
+  (let [m (->SimpleMap {} {})] 
+    (is (= (::meta-key (meta (with-meta m {::meta-key "value"})))
+           "value")))
   (test-basic-map-functionality (->SimpleDerivedMap)))
 
 (deftest test-derived-map
