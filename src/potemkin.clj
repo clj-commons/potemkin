@@ -18,7 +18,7 @@
    equivalent?]
 
   [potemkin.utils
-   
+
    condp-case
    try*
    fast-bound-fn
@@ -40,8 +40,3 @@
    reify-map-type
    def-derived-map
    def-map-type])
-
-
-
-
-
