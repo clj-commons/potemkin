@@ -62,7 +62,7 @@
         ;; all current implementations should be extended
         (let [{:keys [on-interface impls]} @target-proto-var]
           (extend-implementations proto (cons on-interface (keys impls)) body))))
-    
+
     `(extend-protocol ~proto
        ~@(apply concat classes))))
 
@@ -240,17 +240,17 @@
                           true
                           (catch Exception _
                             false))
-                      
+
                       ;; already exists, just re-import it
                       `(do
                          (import ~(symbol class-name))
                          nil)
-                      
+
                       ;; define the interface
                       `(definterface
                          ~name
                          ~@unrolled-body))]
-       
+
        ~@(map
            (fn [[fn-name & arg-lists+doc-string]]
              (let [arg-lists (remove string? arg-lists+doc-string)
@@ -270,7 +270,7 @@
                                             ~@(rest args))
                                           {:tag ~(-> args meta :tag)}))))
                                   arg-lists))]
-               
+
                (unify-gensyms
                  `(defn ~fn-name
                     ~@doc-string
@@ -280,7 +280,7 @@
                           #(list (resolve-tag %) (apply f (map untag %)))
                           arg-lists))))))
            body)
-       
+
        p#)))
 
 ;;;
@@ -317,7 +317,7 @@
                clean-deftype
                expand-deftype
                deftype*->deftype)]
-    
+
     `(reify ~@(drop 3 body))))
 
 ;;;
@@ -329,13 +329,12 @@
 
         prev-body (when (class? (ns-resolve *ns* name))
                     (@type-bodies classname))]
-    
+
     (when-not (and prev-body
                 (equivalent?
                   body
                   prev-body))
-      
-      (swap! type-bodies assoc classname (r/macroexpand-all body))
-      
-      `(defrecord ~name ~@body))))
 
+      (swap! type-bodies assoc classname (r/macroexpand-all (list* 'deftype name body)))
+
+      `(defrecord ~name ~@body))))
