@@ -328,13 +328,14 @@
   (let [classname (with-meta (symbol (str (namespace-munge *ns*) "." name)) (meta name))
 
         prev-body (when (class? (ns-resolve *ns* name))
-                    (@type-bodies classname))]
+                    (@type-bodies classname))
+        body' (list* 'deftype name body)]
 
     (when-not (and prev-body
                 (equivalent?
-                  body
+                  body'
                   prev-body))
 
-      (swap! type-bodies assoc classname (r/macroexpand-all (list* 'deftype name body)))
+      (swap! type-bodies assoc classname (r/macroexpand-all body'))
 
       `(defrecord ~name ~@body))))
