@@ -43,11 +43,11 @@ For instance, here's a map which will automatically realize any delays, allowing
           v))
       default-value))
   (assoc [_ k v]
-    (LazyMap. (assoc m k v))
+    (LazyMap. (assoc m k v)))
   (dissoc [_ k]
      (LazyMap. (dissoc m k)))
   (keys [_]
-    (keys m))))
+    (keys m)))
 ```
 
 ### `def-derived-map`
