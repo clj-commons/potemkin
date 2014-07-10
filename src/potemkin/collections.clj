@@ -86,7 +86,7 @@
   (seq [this]
     (seq
       (map
-        #(clojure.lang.MapEntry. % (.valAt this % nil))
+        #(potemkin.LazyMapEntry. this %)
         (potemkin.collections/keys* this))))
 
   ^{:min-version "1.4.0"}
@@ -140,9 +140,8 @@
     (contains? (.keySet this) k))
 
   (entryAt [this k]
-    (let [v (.valAt this k ::not-found)]
-      (when (not= v ::not-found)
-        (clojure.lang.MapEntry. k v))))
+    (when (contains? (.keySet this) k)
+      (potemkin.LazyMapEntry this k)))
 
   (assoc [this k v]
     (potemkin.collections/assoc* this k v))

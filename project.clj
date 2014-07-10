@@ -13,5 +13,6 @@
                                         (cons (:tag %) (keys %))))
                    :benchmark :benchmark
                    :all (constantly true)}
+  :aot [potemkin.LazyMapEntry]
   :jvm-opts ^:replace ["-server"]
   :repositories {"sonatype-oss-public" "https://oss.sonatype.org/content/groups/public/"})
