@@ -41,7 +41,7 @@
   ([sym name]
      (let [vr (resolve sym)
            m (meta vr)
-           n (or name (:name m))
+           n (or name (with-meta (:name m) {}))
            arglists (:arglists m)]
        (when-not vr
          (throw (IllegalArgumentException. (str "Don't recognize " sym))))
@@ -64,7 +64,7 @@
      (let [vr (resolve sym)
            m (meta vr)
            n (or name (:name m))
-           n (if (:dynamic m) (with-meta n {:dynamic true}) n)
+           n (with-meta n (if (:dynamic m) {:dynamic true} {}))
            nspace (:ns m)]
        (when-not vr
          (throw (IllegalArgumentException. (str "Don't recognize " sym))))
