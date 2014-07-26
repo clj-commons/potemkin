@@ -5,7 +5,7 @@ Potemkin is a collection of facades and workarounds for things that are more dif
 [![Build Status](https://travis-ci.org/ztellman/potemkin.png?branch=master)](https://travis-ci.org/ztellman/potemkin)
 
 ```clj
-[potemkin "0.3.4"]
+[potemkin "0.3.5"]
 ```
 
 ### `import-vars`

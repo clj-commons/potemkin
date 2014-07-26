@@ -18,7 +18,7 @@
              f# (fn ~@fn-body)]
          (fn [~'& args#]
            (with-bindings bindings#
-             (apply f# args#))))      
+             (apply f# args#))))
       `(let [bound-frame# ~(if use-get-binding?
                              `(clojure.lang.Var/getThreadBindingFrame)
                              `(clojure.lang.Var/cloneThreadBindingFrame))
@@ -37,6 +37,9 @@
   (fast-bound-fn [& args]
     (apply f args)))
 
+(defn retry-exception? [x]
+  (= "clojure.lang.LockingTransaction$RetryEx" (.getName ^Class (class x))))
+
 (defmacro try*
   "A variant of try that is fully transparent to transaction retry exceptions"
   [& body+catch]
@@ -48,7 +51,7 @@
                        (when x
                          (let [ex (nth x 2)]
                            `(~@(take 3 x)
-                             (if (lamina.core.utils/retry-exception? ~ex)
+                             (if (potemkin.utils/retry-exception? ~ex)
                                (throw ~ex)
                                (do ~@(drop 3 x)))))))
         class->clause (-> (zipmap (map second catch) catch)
