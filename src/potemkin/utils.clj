@@ -1,7 +1,7 @@
 (ns potemkin.utils
   (:use
     [potemkin macros collections]
-    [clj-tuple])
+    [clj-tuple :exclude [compile-if]])
   (:import
     [java.util.concurrent
      ConcurrentHashMap]))
