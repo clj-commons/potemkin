@@ -70,13 +70,15 @@
       (if-let [[k v] (seq o)]
         (assoc this k v)
         this)))
-  
+
   clojure.lang.IObj
   (withMeta [this mta]
     (potemkin.collections/with-meta* this mta))
   (meta [this]
-        (potemkin.collections/meta* this))
-  
+    (potemkin.collections/meta* this))
+  (meta* [this]
+    nil)
+
   clojure.lang.Counted
 
   (count [this]
@@ -261,44 +263,49 @@
     (unify-gensyms
       `(do
 
-        (def-map-type ~name ~(vec (conj params `added## `removed##))
+         (def-map-type ~name ~(vec (conj params `added## `removed## `meta##))
 
-          (~'get [this# key# default-value#]
-            (cond
-              (contains? added## key#)
-              (get added## key#)
+           (~'meta [_] meta##)
 
-              (contains? removed## key#)
-              default-value#
+           (~'with-meta [_ x#]
+             (new ~name ~@params added## removed## x#))
 
-              :else
-              (case key#
-                ~@key-vals
-                default-value#)))
+           (~'get [this# key# default-value#]
+             (cond
+               (contains? added## key#)
+               (get added## key#)
 
-          (~'keys [this#]
-            (let [keys# ~key-set
-                  keys# (if-not (empty? removed##)
-                          (remove #(contains? removed## %) keys#)
-                          keys#)
-                  keys# (if-not (empty? added##)
-                          (set (concat keys# (keys added##)))
-                          keys#)]
-              keys#))
+               (contains? removed## key#)
+               default-value#
 
-          (~'assoc [this# key# value#]
-            (new ~name ~@params (assoc added## key# value#) removed##))
+               :else
+               (case key#
+                 ~@key-vals
+                 default-value#)))
 
-          (~'dissoc [this# key#]
-            (cond
-              (contains? added## key#)
-              (new ~name ~@params (dissoc added## key#) removed##)
+           (~'keys [this#]
+             (let [keys# ~key-set
+                   keys# (if-not (empty? removed##)
+                           (remove #(contains? removed## %) keys#)
+                           keys#)
+                   keys# (if-not (empty? added##)
+                           (set (concat keys# (keys added##)))
+                           keys#)]
+               keys#))
 
-              (contains? ~key-set key#)
-              (new ~name ~@params added## (set (conj removed## key#)))
+           (~'assoc [this# key# value#]
+             (new ~name ~@params (assoc added## key# value#) removed## meta##))
 
-              :else
-              this#)))
+           (~'dissoc [this# key#]
+             (cond
+               (contains? added## key#)
+               (new ~name ~@params (dissoc added## key#) removed## meta##)
 
-        (defn ~(symbol (str "->" name)) [~@params]
-          (new ~name ~@params nil nil))))))
+               (contains? ~key-set key#)
+               (new ~name ~@params added## (set (conj removed## key#)) meta##)
+
+               :else
+               this#)))
+
+         (defn ~(symbol (str "->" name)) [~@params]
+           (new ~name ~@params nil nil nil))))))
