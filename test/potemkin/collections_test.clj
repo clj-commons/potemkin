@@ -14,6 +14,13 @@
   (with-meta [_ mta] (SimpleMap. m mta))
   (meta [_] mta))
 
+(defn simple-map [m mta]
+  (reify-map-type
+    (get [_ k d] (get m k d))
+    (assoc [_ k v] (simple-map (assoc m k v) mta))
+    (dissoc [_ k] (simple-map (dissoc m k) mta))
+    (keys [_] (keys m))))
+
 (def-derived-map SimpleDerivedMap [])
 
 (def-derived-map DerivedMap [^String s]
@@ -26,10 +33,11 @@
 
 (deftest test-maps
   (test-basic-map-functionality (->SimpleMap {} {}))
-  (let [m (->SimpleMap {} {})] 
+  (let [m (->SimpleMap {} {})]
     (is (= (::meta-key (meta (with-meta m {::meta-key "value"})))
            "value")))
-  (test-basic-map-functionality (->SimpleDerivedMap)))
+  (test-basic-map-functionality (->SimpleDerivedMap))
+  (test-basic-map-functionality (simple-map {} {})))
 
 (deftest test-derived-map
   (let [m (->DerivedMap "AbC")]

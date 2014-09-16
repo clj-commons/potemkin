@@ -236,13 +236,20 @@
               assoc assoc*
               dissoc dissoc*
               keys keys*
-              empty empty*}]
-    `(reify+ ~'potemkin.collections/AbstractMap
-       ~@(map
-           #(if (sequential? %)
-              (list* (get fns (first %) (first %)) (rest %))
-              %)
-           body))))
+              empty empty*}
+        elide? '#{withMeta meta}]
+    (->>
+      `(reify+ ~'potemkin.collections/AbstractMap
+         ~@(map
+             #(if (sequential? %)
+                (list* (get fns (first %) (first %)) (rest %))
+                %)
+             body))
+      macroexpand
+      (remove
+        #(if (sequential? %)
+           (elide? (first %))
+           false)))))
 
 (defmacro def-derived-map
   "Allows a map type to be defined where key-value pairs may be derived from fields.

@@ -318,7 +318,7 @@
                expand-deftype
                deftype*->deftype)]
 
-    `(reify ~@(drop 3 body))))
+    `(reify ~@(->> body (drop 3) (remove #{'clojure.lang.IObj clojure.lang.IObj})))))
 
 ;;;
 
