@@ -15,4 +15,5 @@
                    :all (constantly true)}
   :java-source-paths ["src"]
   :jvm-opts ^:replace ["-server"]
+  :javac-options ["-source" "1.6" "-target" "1.6"]
   :repositories {"sonatype-oss-public" "https://oss.sonatype.org/content/groups/public/"})
