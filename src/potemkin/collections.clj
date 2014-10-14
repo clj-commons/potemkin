@@ -269,12 +269,12 @@
     (unify-gensyms
       `(do
 
-         (def-map-type ~name ~(vec (conj params `added## `removed## `meta##))
+         (def-map-type ~name ~(vec (conj params `key-set## `added## `removed## `meta##))
 
            (~'meta [_] meta##)
 
            (~'with-meta [_ x#]
-             (new ~name ~@params added## removed## x#))
+             (new ~name ~@params key-set## added## removed## x#))
 
            (~'get [this# key# default-value#]
              (cond
@@ -290,7 +290,7 @@
                  default-value#)))
 
            (~'keys [this#]
-             (let [keys# ~key-set
+             (let [keys# key-set##
                    keys# (if-not (empty? removed##)
                            (remove #(contains? removed## %) keys#)
                            keys#)
@@ -300,18 +300,19 @@
                keys#))
 
            (~'assoc [this# key# value#]
-             (new ~name ~@params (assoc added## key# value#) removed## meta##))
+             (new ~name ~@params key-set## (assoc added## key# value#) removed## meta##))
 
            (~'dissoc [this# key#]
              (cond
                (contains? added## key#)
-               (new ~name ~@params (dissoc added## key#) removed## meta##)
+               (new ~name ~@params key-set## (dissoc added## key#) removed## meta##)
 
-               (contains? ~key-set key#)
-               (new ~name ~@params added## (set (conj removed## key#)) meta##)
+               (contains? key-set## key#)
+               (new ~name ~@params key-set## added## (set (conj removed## key#)) meta##)
 
                :else
                this#)))
 
-         (defn ~(symbol (str "->" name)) [~@params]
-           (new ~name ~@params nil nil nil))))))
+         (let [key-set# ~key-set]
+           (defn ~(symbol (str "->" name)) [~@params]
+             (new ~name ~@params key-set# nil nil nil)))))))
