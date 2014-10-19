@@ -269,50 +269,41 @@
     (unify-gensyms
       `(do
 
-         (def-map-type ~name ~(vec (conj params `key-set## `added## `removed## `meta##))
+         (def-map-type ~name ~(vec (conj params `key-set## `added## `meta##))
 
            (~'meta [_] meta##)
 
            (~'with-meta [_ x#]
-             (new ~name ~@params key-set## added## removed## x#))
+             (new ~name ~@params key-set## added## x#))
 
            (~'get [this# key# default-value#]
              (cond
                (contains? added## key#)
                (get added## key#)
 
-               (contains? removed## key#)
-               default-value#
-
-               :else
+               (contains? key-set## key#)
                (case key#
                  ~@key-vals
-                 default-value#)))
-
-           (~'keys [this#]
-             (let [keys# key-set##
-                   keys# (if-not (empty? removed##)
-                           (remove #(contains? removed## %) keys#)
-                           keys#)
-                   keys# (if-not (empty? added##)
-                           (set (concat keys# (keys added##)))
-                           keys#)]
-               keys#))
-
-           (~'assoc [this# key# value#]
-             (new ~name ~@params key-set## (assoc added## key# value#) removed## meta##))
-
-           (~'dissoc [this# key#]
-             (cond
-               (contains? added## key#)
-               (new ~name ~@params key-set## (dissoc added## key#) removed## meta##)
-
-               (contains? key-set## key#)
-               (new ~name ~@params key-set## added## (set (conj removed## key#)) meta##)
+                 default-value#)
 
                :else
-               this#)))
+               default-value#))
+
+           (~'keys [this#]
+             key-set##)
+
+           (~'assoc [this# key# value#]
+             (new ~name ~@params
+               (conj key-set## key#)
+               (assoc added## key# value#)
+               meta##))
+
+           (~'dissoc [this# key#]
+             (new ~name ~@params
+               (disj key-set## key#)
+               (dissoc added## key#)
+               meta##)))
 
          (let [key-set# ~key-set]
            (defn ~(symbol (str "->" name)) [~@params]
-             (new ~name ~@params key-set# nil nil nil)))))))
+             (new ~name ~@params key-set# nil nil)))))))
