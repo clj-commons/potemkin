@@ -1,7 +1,8 @@
 (ns potemkin.utils
   (:use
-    [potemkin macros collections]
-    [clj-tuple :exclude [compile-if]])
+    [potemkin macros collections])
+  (:require
+    [clj-tuple :as t])
   (:import
     [java.util.concurrent
      ConcurrentHashMap]))
@@ -94,7 +95,7 @@
      (if (nil? x#) ::nil x#)))
 
 (defmacro memoize-form [m f & args]
-  `(let [k# (tuple ~@args)]
+  `(let [k# (t/tuple ~@args)]
      (let [v# (.get ~m k#)]
        (if-not (nil? v#)
          (re-nil v#)
