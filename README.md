@@ -29,12 +29,12 @@ The former approach places an onus on the creator of the library; the various or
 
 A Clojure map implements the following interfaces: `clojure.lang.IPersistentCollection`, `clojure.lang.IPersistentMap`, `clojure.lang.Counted`, `clojure.lang.Seqable`, `clojure.lang.ILookup`, `clojure.lang.Associative`, `clojure.lang.IObj`, `java.lang.Object`, `java.util.Map`, `java.util.concurrent.Callable`, `java.lang.Runnable`, and `clojure.lang.IFn`.  Between them, there's a few dozen functions, many with overlapping functionality, all of which need to be correctly implemented.
 
-Despite this, there are only four functions which really matter: `get`, `assoc`, `dissoc`, and `keys`.  `def-map-type` is a variant of `deftype` which, if those four functions are implemented, will look and act like a Clojure map.
+Despite this, there are only six functions which really matter: `get`, `assoc`, `dissoc`, `keys`, `meta`, and `with-meta`.  `def-map-type` is a variant of `deftype` which, if those six functions are implemented, will look and act like a Clojure map.
 
 For instance, here's a map which will automatically realize any delays, allowing for lazy evaluation semantics:
 
 ```clj
-(def-map-type LazyMap [m]	
+(def-map-type LazyMap [m mta]
   (get [_ k default-value]
     (if (contains? m k)
       (let [v (get m k)]
@@ -47,7 +47,11 @@ For instance, here's a map which will automatically realize any delays, allowing
   (dissoc [_ k]
      (LazyMap. (dissoc m k)))
   (keys [_]
-    (keys m)))
+    (keys m))
+  (meta [_]
+    mta)
+  (with-meta [_ mta]
+    (LazyMap. m mta)))
 ```
 
 ### `def-derived-map`
@@ -91,7 +95,7 @@ This abstract type may be used within the body of `deftype+`, which is just like
 
 ### `definterface+`
 
-Every method on a type must be defined within a protocol or an interface.  The standard practice is to use `defprotocol`, but this imposes a certain overhead in both [time and memory](https://gist.github.com/ztellman/5603216).  Furthermore, protocols don't support primitive arguments.  If you need the extensibility of protocols, then there isn't another option, but often interfaces suffice.  
+Every method on a type must be defined within a protocol or an interface.  The standard practice is to use `defprotocol`, but this imposes a certain overhead in both [time and memory](https://gist.github.com/ztellman/5603216).  Furthermore, protocols don't support primitive arguments.  If you need the extensibility of protocols, then there isn't another option, but often interfaces suffice.
 
 While `definterface` uses an entirely different convention than `defprotocol`, `definterface+` uses the same convention, and automatically defines inline-able functions which call into the interface.  Thus, any protocol which doesn't require the extensibility can be trivially turned into an interface, with all the inherent savings.
 
@@ -101,8 +105,8 @@ Gensyms enforce hygiene within macros, but when quote syntax is nested, they can
 
 ```clj
 `(let [x# 1]
-   ~@(map 
-       (fn [n] `(+ x# ~n)) 
+   ~@(map
+       (fn [n] `(+ x# ~n))
        (range 3)))
 ```
 
@@ -111,8 +115,8 @@ Because `x#` is going to expand to a different gensym in the two different conte
 ```clj
 (let [x-sym (gensym "x")]
   `(let [~x-sym 1]
-     ~@(map 
-         (fn [n] `(+ ~x-sym ~n)) 
+     ~@(map
+         (fn [n] `(+ ~x-sym ~n))
          (range 3))))
 ```
 
@@ -121,8 +125,8 @@ However, this is pretty tedious, since we may need to define quite a few of thes
 ```clj
 (unify-gensyms
   `(let [x## 1]
-     ~@(map 
-         (fn [n] `(+ x## ~n)) 
+     ~@(map
+         (fn [n] `(+ x## ~n))
          (range 3)))
 ```
 

@@ -198,6 +198,8 @@
    (assoc [this key value])
    (dissoc [this key])
    (keys [this])
+   (meta [this])
+   (with-meta [this meta])
 
    All other necessary functions will be defined so that this behaves like a normal
    Clojure map.  These can be overriden, if desired."
