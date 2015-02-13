@@ -37,14 +37,18 @@
     (is (= (::meta-key (meta (with-meta m {::meta-key "value"})))
            "value")))
   (test-basic-map-functionality (->SimpleDerivedMap))
-  (test-basic-map-functionality (simple-map {} {})))
+  (test-basic-map-functionality (simple-map {} {}))
+  (is (= [:one "two"] (find (->SimpleMap {:one "two" :three "four"} {}) :one))))
 
 (deftest test-derived-map
   (let [m (->DerivedMap "AbC")]
     (is (= {:string "AbC" :lower "abc" :upper "ABC"} m))
     (is (= {:lower "abc" :upper "ABC"} (dissoc m :string)))
     (is (= {:string "foo" :lower "abc" :upper "ABC" :bar "baz"}
-          (assoc m :string "foo" :bar "baz")))))
+          (assoc m :string "foo" :bar "baz")))
+    (is (= #{:lower :upper :string} (-> m keys set)))
+    (is (= [:lower "abc"] (find m :lower)))
+    (is (= {:lower "abc" :upper "ABC"} (select-keys m [:lower :upper])))))
 
 (def-map-type LazyMap [m]
   (get [_ k default-value]
