@@ -143,7 +143,7 @@
 
   (entryAt [this k]
     (when (contains? (.keySet this) k)
-      (potemkin.LazyMapEntry this k)))
+      (potemkin.LazyMapEntry. this k)))
 
   (assoc [this k v]
     (potemkin.collections/assoc* this k v))
