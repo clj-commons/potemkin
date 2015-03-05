@@ -4,7 +4,7 @@
     [potemkin])
   (:require
     [collection-check :as check]
-    [simple-check.generators :as gen]))
+    [clojure.test.check.generators :as gen]))
 
 (def-map-type SimpleMap [m mta]
   (get [_ k d] (get m k d))
@@ -29,7 +29,7 @@
   :upper (.toUpperCase s))
 
 (defn test-basic-map-functionality [m]
-  (check/assert-map-like m gen/keyword gen/pos-int))
+  (check/assert-map-like m gen/pos-int gen/pos-int))
 
 (deftest test-maps
   (test-basic-map-functionality (->SimpleMap {} {}))
