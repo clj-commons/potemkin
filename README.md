@@ -43,9 +43,9 @@ For instance, here's a map which will automatically realize any delays, allowing
           v))
       default-value))
   (assoc [_ k v]
-    (LazyMap. (assoc m k v)))
+    (LazyMap. (assoc m k v) mta))
   (dissoc [_ k]
-     (LazyMap. (dissoc m k)))
+     (LazyMap. (dissoc m k) mta))
   (keys [_]
     (keys m))
   (meta [_]
