@@ -95,7 +95,7 @@
      (if (nil? x#) ::nil x#)))
 
 (defmacro memoize-form [m f & args]
-  `(let [k# (t/tuple ~@args)]
+  `(let [k# (t/vector ~@args)]
      (let [v# (.get ~m k#)]
        (if-not (nil? v#)
          (re-nil v#)

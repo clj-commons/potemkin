@@ -1,7 +1,7 @@
-(defproject potemkin "0.3.12"
+(defproject potemkin "0.3.13"
   :license {:name "MIT License"}
   :description "Some useful facades."
-  :dependencies [[clj-tuple "0.1.7"]
+  :dependencies [[clj-tuple "0.2.1"]
                  [riddley "0.1.7"]]
   :profiles {:dev {:dependencies [[org.clojure/clojure "1.7.0-alpha5"]
                                   [criterium "0.4.3"]
