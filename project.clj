@@ -3,7 +3,7 @@
   :description "Some useful facades."
   :dependencies [[clj-tuple "0.2.1"]
                  [riddley "0.1.7"]]
-  :profiles {:dev {:dependencies [[org.clojure/clojure "1.7.0-alpha5"]
+  :profiles {:dev {:dependencies [[org.clojure/clojure "1.7.0-RC1"]
                                   [criterium "0.4.3"]
                                   [collection-check "0.1.5"]]}}
   :global-vars {*warn-on-reflection* true}

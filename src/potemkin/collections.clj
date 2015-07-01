@@ -176,6 +176,10 @@
   (entrySet [this]
     (->> this seq set))
 
+  java.util.Iterator
+  (iterator [this]
+    (clojure.lang.SeqIterator. this))
+
   clojure.lang.IPersistentMap
   (assocEx [this k v]
     (if (contains? this k)
