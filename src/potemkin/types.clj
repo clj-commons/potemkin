@@ -131,8 +131,8 @@
       remove-nil-implements)))
 
 (defn deftype*->deftype [x]
-  (let [[_ name _ params _ implements & body] (deftype->deftype* x)]
-    (list* 'deftype name params (concat (remove #{'clojure.lang.IType} implements) body))))
+  (let [[_ dname _ params _ implements & body] (deftype->deftype* x)]
+    (list* 'deftype (symbol (name dname)) params (concat (remove #{'clojure.lang.IType} implements) body))))
 
 (defn deftype*->fn-map [x]
   (let [fns (drop 6 x)
