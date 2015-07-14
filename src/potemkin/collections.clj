@@ -88,7 +88,7 @@
   (seq [this]
     (seq
       (map
-        #(potemkin.LazyMapEntry. this %)
+        #(potemkin.PersistentMapProxy$MapEntry. this %)
         (potemkin.collections/keys* this))))
 
   ^{:min-version "1.4.0"}
@@ -143,7 +143,7 @@
 
   (entryAt [this k]
     (when (contains? (.keySet this) k)
-      (potemkin.LazyMapEntry. this k)))
+      (potemkin.PersistentMapProxy$MapEntry. this k)))
 
   (assoc [this k v]
     (potemkin.collections/assoc* this k v))

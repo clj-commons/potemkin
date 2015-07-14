@@ -3,6 +3,7 @@
     [clojure test]
     [potemkin])
   (:require
+    [potemkin.proxies :as p]
     [collection-check :as check]
     [clojure.test.check.generators :as gen]))
 
@@ -13,6 +14,13 @@
   (keys [_] (keys m))
   (with-meta [_ mta] (SimpleMap. m mta))
   (meta [_] mta))
+
+(p/def-map-type SimpleMapProxy [m]
+  (get [_ k d] (get m k d))
+  (assoc [_ k v] (SimpleMapProxy. (assoc m k v)))
+  (dissoc [_ k] (SimpleMapProxy. (dissoc m k)))
+  (key-set [_] (set (keys m)))
+  (empty [_] (SimpleMapProxy. {})))
 
 (defn simple-map [m mta]
   (reify-map-type
@@ -28,11 +36,17 @@
   :lower (.toLowerCase s)
   :upper (.toUpperCase s))
 
+(p/def-derived-map DerivedMapProxy [^String s]
+  :string s
+  :lower (.toLowerCase s)
+  :upper (.toUpperCase s))
+
 (defn test-basic-map-functionality [m]
-  (check/assert-map-like m gen/pos-int gen/pos-int))
+  (check/assert-map-like 1e3 m gen/pos-int gen/pos-int))
 
 (deftest test-maps
   (test-basic-map-functionality (->SimpleMap {} {}))
+  (test-basic-map-functionality (->SimpleMapProxy {}))
   (let [m (->SimpleMap {} {})]
     (is (= (::meta-key (meta (with-meta m {::meta-key "value"})))
            "value")))
@@ -40,8 +54,8 @@
   (test-basic-map-functionality (simple-map {} {}))
   (is (= [:one "two"] (find (->SimpleMap {:one "two" :three "four"} {}) :one))))
 
-(deftest test-derived-map
-  (let [m (->DerivedMap "AbC")]
+(defn test-derived-map [f]
+  (let [m (f "AbC")]
     (is (= {:string "AbC" :lower "abc" :upper "ABC"} m))
     (is (= {:lower "abc" :upper "ABC"} (dissoc m :string)))
     (is (= {:string "foo" :lower "abc" :upper "ABC" :bar "baz"}
@@ -49,6 +63,10 @@
     (is (= #{:lower :upper :string} (-> m keys set)))
     (is (= [:lower "abc"] (find m :lower)))
     (is (= {:lower "abc" :upper "ABC"} (select-keys m [:lower :upper])))))
+
+(deftest test-derived-maps
+  (test-derived-map ->DerivedMap)
+  (test-derived-map ->DerivedMapProxy))
 
 (def-map-type LazyMap [m]
   (get [_ k default-value]
