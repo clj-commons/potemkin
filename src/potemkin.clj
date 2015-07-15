@@ -23,7 +23,9 @@
    try*
    fast-bound-fn
    fast-bound-fn*
-   fast-memoize]
+   fast-memoize
+   doit
+   doary]
 
   [potemkin.types
 

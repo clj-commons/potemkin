@@ -1,6 +1,6 @@
 (ns potemkin.collections
   (:use
-    [potemkin types macros]))
+    [potemkin types macros utils]))
 
 (defprotocol PotemkinMap
   (empty* [m])
@@ -176,6 +176,10 @@
   (entrySet [this]
     (->> this seq set))
 
+  java.util.Iterator
+  (iterator [this]
+    (clojure.lang.SeqIterator. this))
+
   clojure.lang.IPersistentMap
   (assocEx [this k v]
     (if (contains? this k)
@@ -266,30 +270,41 @@
    etc.
 
    The above class will automatically create a constructor named '->StringMap'."
-  [name params & key-vals]
-  (let [key-set (->> key-vals (partition 2) (map first) set)]
+  [name params & {:as m}]
+  (let [interface (symbol (str "ILookup" name))
+        methods (->> (count m) range (map #(symbol (str "get__" %))))
+        key-set (set (keys m))]
     (unify-gensyms
       `(do
 
+         (definterface ~interface
+           ~@(map
+               #(list % [])
+               methods))
+
          (def-map-type ~name ~(vec (conj params `key-set## `added## `meta##))
+
+           ~interface
+           ~@(->> (map vector methods (vals m))
+               (map
+                 (fn [[name f]]
+                   (list name `[_#] f))))
 
            (~'meta [_] meta##)
 
            (~'with-meta [_ x#]
              (new ~name ~@params key-set## added## x#))
 
-           (~'get [this# key# default-value#]
-             (cond
-               (contains? added## key#)
-               (get added## key#)
-
-               (contains? key-set## key#)
-               (case key#
-                 ~@key-vals
-                 default-value#)
-
-               :else
-               default-value#))
+           (~'get [this## key# default-value#]
+             (if-let [e# (find added## key#)]
+               (val e#)
+               (if (contains? key-set## key#)
+                 (case key#
+                   ~@(interleave
+                       (keys m)
+                       (map (fn [m] `(~(symbol (str "." m)) this##)) methods))
+                   default-value#)
+                 default-value#)))
 
            (~'keys [this#]
              key-set##)

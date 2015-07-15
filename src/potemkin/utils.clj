@@ -1,7 +1,6 @@
 (ns potemkin.utils
-  (:use
-    [potemkin macros collections])
   (:require
+    [potemkin.macros :refer [unify-gensyms]]
     [clj-tuple :as t])
   (:import
     [java.util.concurrent
@@ -128,3 +127,26 @@
                (re-nil v)
                (let [v (de-nil (apply f k))]
                  (or (.putIfAbsent m k v) v)))))))))
+
+;;;
+
+(defmacro doit
+  "A version of doseq that doesn't emit all that inline-destroying chunked-seq code."
+  [[x it] & body]
+  (let [it-sym (gensym "iterable")]
+    `(let [~it-sym ~it
+           it# (.iterator ~(with-meta it-sym {:tag "Iterable"}))]
+       (loop []
+         (when (.hasNext it#)
+           (let [~x (.next it#)]
+            ~@body)
+           (recur))))))
+
+(defmacro doary
+  "An array-specific version of doseq."
+  [[x ary] & body]
+  (let [ary-sym (gensym "ary")]
+    `(let [~(with-meta ary-sym {:tag "objects"}) ~ary]
+       (dotimes [idx# (alength ~ary-sym)]
+         (let [~x (aget ~ary-sym idx#)]
+           ~@body)))))
