@@ -1,4 +1,4 @@
-(defproject potemkin "0.4.0"
+(defproject potemkin "0.4.1"
   :license {:name "MIT License"}
   :description "Some useful facades."
   :dependencies [[clj-tuple "0.2.2"]
