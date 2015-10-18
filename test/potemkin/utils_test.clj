@@ -15,6 +15,18 @@
 (deftest test-try*
   )
 
+(deftest fast-memoize-test
+  (testing "returns nil on first call"
+    (let [f (fn [x] nil)
+          f' (fast-memoize f)]
+      (is (nil? (f' 1)))))
+
+  (testing "memoizes"
+    (let [f' (fast-memoize +)]
+      (is (= 5 (f' 2 3)))
+      (is (= 5 (f' 2 3)))
+      (is (= 6 (f' 2 3 1))))))
+
 (deftest ^:benchmark benchmark-fast-memoize
   (let [f (memoize +)
         f' (fast-memoize +)]

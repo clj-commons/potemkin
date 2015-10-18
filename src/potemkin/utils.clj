@@ -99,7 +99,7 @@
        (if-not (nil? v#)
          (re-nil v#)
          (let [v# (de-nil (~f ~@args))]
-           (or (.putIfAbsent ~m k# v#) v#))))))
+           (re-nil (or (.putIfAbsent ~m k# v#) v#)))))))
 
 (defn fast-memoize
   "A version of `memoize` which has equivalent behavior, but is faster."
