@@ -235,21 +235,21 @@
                         body)
         class-name (str/replace (str *ns* "." name) #"\-" "_")]
 
-    `(when-let [p# ~(if (try
-                          (Class/forName class-name)
-                          true
-                          (catch Exception _
-                            false))
+    `(let [p# ~(if (try
+                     (Class/forName class-name)
+                     true
+                     (catch Exception _
+                       false))
 
-                      ;; already exists, just re-import it
-                      `(do
-                         (import ~(symbol class-name))
-                         nil)
+                 ;; already exists, just re-import it
+                 `(do
+                    (import ~(symbol class-name))
+                    nil)
 
-                      ;; define the interface
-                      `(definterface
-                         ~name
-                         ~@unrolled-body))]
+                 ;; define the interface
+                 `(definterface
+                    ~name
+                    ~@unrolled-body))]
 
        ~@(map
            (fn [[fn-name & arg-lists+doc-string]]
