@@ -74,29 +74,36 @@
           (link-vars ~vr (var ~n))
           ~vr))))
 
+(defn- unravel* [ns x]
+  (let [[sym new-name] (if (sequential? x)
+                         x
+                         [x x])]
+       [(symbol
+         (str ns
+              (when-let [n (namespace sym)]
+                (str "." n)))
+         (name sym))
+        new-name]))
+
+(defn- unravel [x]
+  (if (sequential? x)
+    (->> x
+         rest
+         (map #(unravel* (first x) %)))
+    [[x x]]))
+
 (defmacro import-vars
   "Imports a list of vars from other namespaces."
   [& syms]
-  (let [unravel (fn unravel [x]
-                  (if (sequential? x)
-                    (->> x
-                         rest
-                         (mapcat unravel)
-                         (map
-                          #(symbol
-                            (str (first x)
-                                 (when-let [n (namespace %)]
-                                   (str "." n)))
-                            (name %))))
-                    [x]))
-        syms (mapcat unravel syms)]
+  (let [syms (mapcat unravel syms)]
     `(do
        ~@(map
-          (fn [sym]
+          (fn [[sym new-name]]
             (let [vr (resolve sym)
                   m (meta vr)]
               (cond
-               (:macro m) `(import-macro ~sym)
-               (:arglists m) `(import-fn ~sym)
-               :else `(import-def ~sym))))
+               (:macro m) `(import-macro ~sym ~new-name)
+               (:arglists m) `(import-fn ~sym ~new-name)
+               :else `(import-def ~sym ~new-name))))
           syms))))
+
