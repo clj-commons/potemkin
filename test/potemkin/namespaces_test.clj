@@ -16,6 +16,7 @@
 (import-fn i/inlined-fn)
 (import-def i/some-value)
 
+
 (defn drop-lines [n s]
   (->> s str/split-lines (drop n) (interpose "\n") (apply str)))
 
@@ -44,3 +45,10 @@
   (is (= 1 some-value))
   (require 'potemkin.imports-test :reload)
   (is (= 1 some-value)))
+
+(deftest import-vars-throws-if-missing-var
+  (try
+    (import-vars [clojure.set union onion-misspelled])
+    (is false "`import-vars` should have thrown an exception")
+  (catch Exception ex
+    (is "`clojure.set/onion-misspelled` does not exist" (.getMessage ex)))))

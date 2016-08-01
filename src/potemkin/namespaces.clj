@@ -96,6 +96,7 @@
             (let [vr (resolve sym)
                   m (meta vr)]
               (cond
+               (nil? vr) `(throw (ex-info (format "`%s` does not exist" '~sym) {}))
                (:macro m) `(import-macro ~sym)
                (:arglists m) `(import-fn ~sym)
                :else `(import-def ~sym))))
