@@ -18,6 +18,12 @@
   (is (= nil (eval '(potemkin/defprotocol+ BarP (bar [x y])))))
   (is (not= nil (eval '(potemkin/defprotocol+ BarP (bar [x y z]))))))
 
+(deftest test-empty-defprotocol+-body
+  (let [prot-sym (gensym)]
+    (binding [*ns* (the-ns 'potemkin.types-test)]
+      (eval (list 'potemkin/defprotocol+ prot-sym))
+      (is (resolve prot-sym)))))
+
 (deftest test-definterface+
   (is (not= nil (eval '(potemkin/definterface+ IBar (bar-baz [x y])))))
   (is (= nil (eval '(potemkin/definterface+ IBar (bar-baz [x y])))))

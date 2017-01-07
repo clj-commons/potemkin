@@ -173,7 +173,8 @@
   "A protocol that won't evaluate if an equivalent protocol with the same name already exists."
   [name & body]
   (let [prev-body (-> name resolve meta :potemkin/body)]
-    (when-not (equivalent? prev-body body)
+    (when (or (not (equivalent? prev-body body))
+              (-> name resolve nil?))
       `(let [p# (defprotocol ~name ~@body)]
          (alter-meta! (resolve p#) assoc :potemkin/body '~(r/macroexpand-all body))
          p#))))
