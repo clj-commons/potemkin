@@ -62,7 +62,8 @@
   clojure.lang.IPersistentCollection
 
   (equiv [this x]
-    (and (map? x) (= x (into {} this))))
+    (and (or (instance? java.util.Map x) (map? x))
+         (= x (into {} this))))
 
   (cons [this o]
     (if (map? o)
@@ -125,7 +126,7 @@
   (equals [this x]
     (or (identical? this x)
       (and
-        (map? x)
+        (or (instance? java.util.Map x) (map? x))
         (= x (into {} this)))))
 
   (toString [this]
