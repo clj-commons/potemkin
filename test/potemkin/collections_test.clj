@@ -21,6 +21,9 @@
     (dissoc [_ k] (simple-map (dissoc m k) mta))
     (keys [_] (keys m))))
 
+(deftest test-simple-map-equiv
+  (is (= (java.util.HashMap.) (simple-map {} {}))))
+
 (def-derived-map SimpleDerivedMap [])
 
 (def-derived-map DerivedMap [^String s]
