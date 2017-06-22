@@ -119,7 +119,8 @@
   (hashCode [this]
     (reduce
       (fn [acc [k v]]
-        (unchecked-add acc (bit-xor (.hashCode k) (.hashCode v))))
+        (unchecked-add acc (bit-xor (clojure.lang.Util/hash k)
+                                    (clojure.lang.Util/hash v))))
       0
       (seq this)))
 
