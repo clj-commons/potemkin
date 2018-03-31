@@ -66,8 +66,14 @@
          (= x (into {} this))))
 
   (cons [this o]
-    (if (map? o)
+    (cond
+      (map? o)
       (reduce #(apply assoc %1 %2) this o)
+
+      (instance? java.util.Map o)
+      (reduce #(apply assoc %1 %2) this (into {} o))
+
+      :else
       (if-let [[k v] (seq o)]
         (assoc this k v)
         this)))
