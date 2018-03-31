@@ -41,7 +41,10 @@
            "value")))
   (test-basic-map-functionality (->SimpleDerivedMap))
   (test-basic-map-functionality (simple-map {} {}))
-  (is (= [:one "two"] (find (->SimpleMap {:one "two" :three "four"} {}) :one))))
+  (is (= [:one "two"] (find (->SimpleMap {:one "two" :three "four"} {}) :one)))
+  (is (= {:old 1 :new 2} (conj (->SimpleMap {:old 1} {}) {:new 2})))
+  (is (= {:old 1 :new 2} (conj (->SimpleMap {:old 1} {}) (doto (java.util.HashMap.)
+                                                           (.put :new 2))))))
 
 (defn test-derived-map [f]
   (let [m (f "AbC")]
