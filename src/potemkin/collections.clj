@@ -116,7 +116,7 @@
     (potemkin.collections/compile-if (resolve 'clojure.core/hash-unordered-coll)
       (hash-unordered-coll (or (seq this) ()))
       (reduce
-        (fn [acc [k v]]
+        (fn [^long acc [k v]]
           (unchecked-add acc (bit-xor (hash k) (hash v))))
         0
         (seq this))))
@@ -124,7 +124,7 @@
   Object
   (hashCode [this]
     (reduce
-      (fn [acc [k v]]
+      (fn [^long acc [k v]]
         (unchecked-add acc (bit-xor (clojure.lang.Util/hash k)
                                     (clojure.lang.Util/hash v))))
       0
