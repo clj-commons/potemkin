@@ -1,4 +1,5 @@
 language: clojure
+dist: trusty
 script: lein do clean, test
 sudo: false
 jdk:
