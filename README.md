@@ -1,8 +1,10 @@
+[![Clojars Project](https://img.shields.io/clojars/v/potemkin.svg)](https://clojars.org/potemkin)
+[![cljdoc badge](https://cljdoc.org/badge/potemkin)](https://cljdoc.org/d/potemkin)
+[![CircleCI](https://circleci.com/gh/clj-commons/potemkin.svg?style=svg)](https://circleci.com/gh/clj-commons/potemkin)
+
 Potemkin is a collection of facades and workarounds for things that are more difficult than they should be.  All functions are within the `potemkin` namespace.
 
 ### usage
-
-[![Build Status](https://travis-ci.org/ztellman/potemkin.png?branch=master)](https://travis-ci.org/ztellman/potemkin)
 
 ```clj
 [potemkin "0.4.5"]
