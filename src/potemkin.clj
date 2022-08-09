@@ -1,6 +1,10 @@
 (ns potemkin
   (:require
-    [potemkin namespaces types collections macros utils]))
+    [potemkin.namespaces]
+    [potemkin.types]
+    [potemkin.collections]
+    [potemkin.macros]
+    [potemkin.utils]))
 
 (potemkin.namespaces/import-vars potemkin.namespaces/import-vars) ;; totally meta
 

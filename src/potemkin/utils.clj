@@ -131,7 +131,7 @@
 ;;;
 
 (defmacro doit
-  "A version of doseq that doesn't emit all that inline-destroying chunked-seq code."
+  "An iterable-based version of doseq that doesn't emit inline-destroying chunked-seq code."
   [[x it] & body]
   (let [it-sym (gensym "iterable")]
     `(let [~it-sym ~it
