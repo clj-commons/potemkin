@@ -214,7 +214,7 @@
    (with-meta [this meta])
 
    All other necessary functions will be defined so that this behaves like a normal
-   Clojure map.  These can be overriden, if desired."
+   Clojure map.  These can be overridden, if desired."
   [name params & body]
   (let [fns '{get get*
               assoc assoc*
