@@ -6,7 +6,7 @@
     [java.util.concurrent
      ConcurrentHashMap]))
 
-(defmacro fast-bound-fn
+(defmacro ^:deprecated fast-bound-fn
   "Creates a variant of bound-fn which doesn't assume you want a merged
    context between the source and execution environments."
   [& fn-body]
@@ -31,16 +31,16 @@
                (finally
                  (clojure.lang.Var/resetThreadBindingFrame curr-frame#)))))))))
 
-(defn fast-bound-fn*
+(defn ^:deprecated fast-bound-fn*
   "Creates a function which conveys bindings, via fast-bound-fn."
   [f]
   (fast-bound-fn [& args]
     (apply f args)))
 
-(defn retry-exception? [x]
+(defn ^:no-doc retry-exception? [x]
   (= "clojure.lang.LockingTransaction$RetryEx" (.getName ^Class (class x))))
 
-(defmacro try*
+(defmacro ^:deprecated ^:no-doc try*
   "A variant of try that is fully transparent to transaction retry exceptions"
   [& body+catch]
   (let [body (take-while
@@ -85,15 +85,15 @@
 
 ;;; fast-memoize
 
-(definline re-nil [x]
+(definline ^:no-doc re-nil [x]
   `(let [x# ~x]
      (if (identical? ::nil x#) nil x#)))
 
-(definline de-nil [x]
+(definline ^:no-doc de-nil [x]
   `(let [x# ~x]
      (if (nil? x#) ::nil x#)))
 
-(defmacro memoize-form [m f & args]
+(defmacro ^:no-doc memoize-form [m f & args]
   `(let [k# (t/vector ~@args)]
      (let [v# (.get ~m k#)]
        (if-not (nil? v#)
@@ -101,8 +101,11 @@
          (let [v# (de-nil (~f ~@args))]
            (re-nil (or (.putIfAbsent ~m k# v#) v#)))))))
 
-(defn fast-memoize
-  "A version of `memoize` which has equivalent behavior, but is faster."
+(defn ^{:deprecated true
+        :no-doc true
+        :superseded-by "clojure.core/memoize"} fast-memoize
+  "Quite possibly not faster than core memoize any more.
+   See https://github.com/clj-commons/byte-streams/pull/50 and profile your use case."
   [f]
   (let [m (ConcurrentHashMap.)]
     (fn
