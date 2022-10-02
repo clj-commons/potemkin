@@ -9,4 +9,4 @@ push
 .nrepl*
 .idea
 *.iml
-/.clj-kondo/.cache/
+.cache
