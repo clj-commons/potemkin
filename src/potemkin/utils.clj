@@ -6,9 +6,12 @@
     [java.util.concurrent
      ConcurrentHashMap]))
 
-(defmacro ^:deprecated fast-bound-fn
-  "Creates a variant of bound-fn which doesn't assume you want a merged
-   context between the source and execution environments."
+(defmacro ^{:deprecated true
+            :no-doc true
+            :superseded-by "clojure.core/bound-fn"} fast-bound-fn
+  "Quite probably not faster than core bound-fn these days.
+
+   ~45% slower in personal testing. Be sure to profile your use case."
   [& fn-body]
   (let [{:keys [major minor]} *clojure-version*
         use-thread-bindings? (and (= 1 major) (< minor 3))
@@ -31,8 +34,12 @@
                (finally
                  (clojure.lang.Var/resetThreadBindingFrame curr-frame#)))))))))
 
-(defn ^:deprecated fast-bound-fn*
-  "Creates a function which conveys bindings, via fast-bound-fn."
+(defn ^{:deprecated true
+        :no-doc true
+        :superseded-by "clojure.core/bound-fn*"} fast-bound-fn*
+  "Quite probably not faster than core bound-fn* these days.
+
+   ~45% slower in personal testing. Be sure to profile your use case."
   [f]
   (fast-bound-fn [& args]
     (apply f args)))
