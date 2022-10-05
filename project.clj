@@ -1,6 +1,9 @@
 (defproject potemkin "0.4.6"
   :license {:name "MIT License"}
   :description "Some useful facades."
+  :deploy-repositories [["clojars" {:url "https://repo.clojars.org"
+                                    :sign-releases false}]]
+
   :dependencies [[clj-tuple "0.2.2"]
                  [riddley "0.1.12"]]
   :profiles {:dev {:dependencies [[criterium "0.4.6"]
