@@ -6,9 +6,12 @@
     [java.util.concurrent
      ConcurrentHashMap]))
 
-(defmacro fast-bound-fn
-  "Creates a variant of bound-fn which doesn't assume you want a merged
-   context between the source and execution environments."
+(defmacro ^{:deprecated true
+            :no-doc true
+            :superseded-by "clojure.core/bound-fn"} fast-bound-fn
+  "Quite probably not faster than core bound-fn these days.
+
+   ~45% slower in personal testing. Be sure to profile your use case."
   [& fn-body]
   (let [{:keys [major minor]} *clojure-version*
         use-thread-bindings? (and (= 1 major) (< minor 3))
@@ -31,16 +34,20 @@
                (finally
                  (clojure.lang.Var/resetThreadBindingFrame curr-frame#)))))))))
 
-(defn fast-bound-fn*
-  "Creates a function which conveys bindings, via fast-bound-fn."
+(defn ^{:deprecated true
+        :no-doc true
+        :superseded-by "clojure.core/bound-fn*"} fast-bound-fn*
+  "Quite probably not faster than core bound-fn* these days.
+
+   ~45% slower in personal testing. Be sure to profile your use case."
   [f]
   (fast-bound-fn [& args]
     (apply f args)))
 
-(defn retry-exception? [x]
+(defn ^:no-doc retry-exception? [x]
   (= "clojure.lang.LockingTransaction$RetryEx" (.getName ^Class (class x))))
 
-(defmacro try*
+(defmacro ^:deprecated ^:no-doc try*
   "A variant of try that is fully transparent to transaction retry exceptions"
   [& body+catch]
   (let [body (take-while
@@ -85,15 +92,15 @@
 
 ;;; fast-memoize
 
-(definline re-nil [x]
+(definline ^:no-doc re-nil [x]
   `(let [x# ~x]
      (if (identical? ::nil x#) nil x#)))
 
-(definline de-nil [x]
+(definline ^:no-doc de-nil [x]
   `(let [x# ~x]
      (if (nil? x#) ::nil x#)))
 
-(defmacro memoize-form [m f & args]
+(defmacro ^:no-doc memoize-form [m f & args]
   `(let [k# (t/vector ~@args)]
      (let [v# (.get ~m k#)]
        (if-not (nil? v#)
@@ -101,8 +108,11 @@
          (let [v# (de-nil (~f ~@args))]
            (re-nil (or (.putIfAbsent ~m k# v#) v#)))))))
 
-(defn fast-memoize
-  "A version of `memoize` which has equivalent behavior, but is faster."
+(defn ^{:deprecated true
+        :no-doc true
+        :superseded-by "clojure.core/memoize"} fast-memoize
+  "Quite possibly not faster than core memoize any more.
+   See https://github.com/clj-commons/byte-streams/pull/50 and profile your use case."
   [f]
   (let [m (ConcurrentHashMap.)]
     (fn
@@ -131,7 +141,7 @@
 ;;;
 
 (defmacro doit
-  "A version of doseq that doesn't emit all that inline-destroying chunked-seq code."
+  "An iterable-based version of doseq that doesn't emit inline-destroying chunked-seq code."
   [[x it] & body]
   (let [it-sym (gensym "iterable")]
     `(let [~it-sym ~it

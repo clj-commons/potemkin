@@ -1,10 +1,9 @@
 (ns potemkin.collections-test
-  (:use
-    [clojure test]
-    [potemkin])
   (:require
     [collection-check :as check]
-    [clojure.test.check.generators :as gen]))
+    [clojure.test :refer :all]
+    [clojure.test.check.generators :as gen]
+    [potemkin.collections :refer :all]))
 
 (def-map-type SimpleMap [m mta]
   (get [_ k d] (get m k d))

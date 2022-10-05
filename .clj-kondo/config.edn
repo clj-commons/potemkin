@@ -1,0 +1,2 @@
+{:config-paths ["../resources/clj-kondo.exports/potemkin/potemkin/"]}
+

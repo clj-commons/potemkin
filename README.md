@@ -4,10 +4,16 @@
 
 Potemkin is a collection of facades and workarounds for things that are more difficult than they should be.  All functions are within the `potemkin` namespace.
 
-### usage
+### Usage
 
-```clj
-[potemkin "0.4.5"]
+##### Leiningen
+```clojure
+[potemkin "0.4.6"]
+```
+
+##### deps.edn
+```clojure
+potemkin/potemkin {:mvn/version "0.4.6"}
 ```
 
 ### `import-vars`
@@ -18,7 +24,7 @@ The former approach places an onus on the creator of the library; the various or
 
 `import-vars` allows functions, macros, and values to be defined in one namespace, and exposed in another.  This means that the structure of your code and the structure of your API can be decoupled.
 
-```clj
+```clojure
 (import-vars
   [clojure.walk
     prewalk
@@ -35,7 +41,7 @@ Despite this, there are only six functions which really matter: `get`, `assoc`, 
 
 For instance, here's a map which will automatically realize any delays, allowing for lazy evaluation semantics:
 
-```clj
+```clojure
 (def-map-type LazyMap [m mta]
   (get [_ k default-value]
     (if (contains? m k)
@@ -60,7 +66,7 @@ For instance, here's a map which will automatically realize any delays, allowing
 
 Often a map is just a view onto another object, especially when dealing with Java APIs.  While we can create a function which converts it into an entirely separate object, for both performance and memory reasons it can be useful to create a map which simply acts as a delegate to the underlying objects:
 
-```clj
+```clojure
 (def-derived-map StringProperties [^String s]
   :base s
   :lower-case (.toLowerCase s)
@@ -75,7 +81,7 @@ The reason it's so laborious to define a map-like data structure is because the 
 
 However, using `def-abstract-type`, we can avoid this:
 
-```clj
+```clojure
 (def-abstract-type ASeq
   (more [this]
     (let [n (next this)]
@@ -86,7 +92,7 @@ However, using `def-abstract-type`, we can avoid this:
 
 This abstract type may be used within the body of `deftype+`, which is just like a vanilla `deftype` except for the support for abstract types.
 
-```clj
+```clojure
 (deftype+ CustomSeq [s]
   ASeq
   clojure.lang.ISeq
@@ -105,7 +111,7 @@ While `definterface` uses an entirely different convention than `defprotocol`, `
 
 Gensyms enforce hygiene within macros, but when quote syntax is nested, they can become a pain.  This, for instance, doesn't work:
 
-```clj
+```clojure
 `(let [x# 1]
    ~@(map
        (fn [n] `(+ x# ~n))
@@ -114,7 +120,7 @@ Gensyms enforce hygiene within macros, but when quote syntax is nested, they can
 
 Because `x#` is going to expand to a different gensym in the two different contexts.  One way to work around this is to explicitly create a gensym ourselves:
 
-```clj
+```clojure
 (let [x-sym (gensym "x")]
   `(let [~x-sym 1]
      ~@(map
@@ -124,17 +130,13 @@ Because `x#` is going to expand to a different gensym in the two different conte
 
 However, this is pretty tedious, since we may need to define quite a few of these explicit gensym names.  Using `unify-gensyms`, however, we can rely on the convention that any var with two hashes at the end should be unified:
 
-```clj
+```clojure
 (unify-gensyms
   `(let [x## 1]
      ~@(map
          (fn [n] `(+ x## ~n))
          (range 3)))
 ```
-
-### `fast-bound-fn` and `fast-memoize`
-
-Variants of Clojure's `bound-fn` and `memoize` which are significantly faster.
 
 ### License
 

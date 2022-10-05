@@ -1,7 +1,7 @@
 (ns potemkin.types-test
-  (:use
-    [clojure test]
-    [potemkin]))
+  (:require
+    [clojure.test :refer :all]
+    [potemkin.types :refer :all]))
 
 (deftest test-defrecord+
   (is (not= nil (eval '(potemkin/defrecord+ FooR [x y]))))
