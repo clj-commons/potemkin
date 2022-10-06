@@ -160,3 +160,81 @@
        (dotimes [idx# (alength ~ary-sym)]
          (let [~x (aget ~ary-sym idx#)]
            ~@body)))))
+
+
+
+(comment
+  (defn foo [nums]
+    (reduce + nums))
+
+  (def memo-foo (memoize foo))
+  (def fast-memo-foo (fast-memoize foo))
+
+  (def quads (vec (take 100 (cycle (partition 4 (range 100))))))
+
+  (bench (run! memo-foo quads))
+
+  (bench (run! fast-memo-foo quads))
+
+
+  (defn exercise-vec
+    [v]
+    (let [c (count v)
+          oneth (nth v 0 -20)]
+      (reduce + (+ c oneth) v)))
+
+
+  ;; monomorphic vs megamorphic comparison
+  (let [v0 (vector)
+        v1 (vector 1)
+        v2 (vector 1 2)
+        v3 (vector 1 2 3 4 5)]
+    (bench
+      (do
+        (exercise-vec v0)
+        (exercise-vec v1)
+        (exercise-vec v2)
+        (exercise-vec v3))))
+  (let [v0 (t/vector)
+        v1 (t/vector 1)
+        v2 (t/vector 1 2)
+        v3 (t/vector 1 2 3 4 5)]
+    (bench
+      (do
+        (exercise-vec v0)
+        (exercise-vec v1)
+        (exercise-vec v2)
+        (exercise-vec v3))))
+
+  (bench
+    (do
+      (vector)
+      (vector 1)
+      (vector 1 :two)
+      (vector 1 2 :three 4 :five)
+      (vector 1 2 3 4 5 :6 "7" :8 'symbol9 :10)))
+  (bench
+    (do
+      (t/vector)
+      (t/vector 1)
+      (t/vector 1 :two)
+      (t/vector 1 2 :three 4 :five)
+      (t/vector 1 2 3 4 5 :6 "7" :8 'symbol9 :10)))
+
+  (bench {1 2 3 4 5 :asd "123" 6 7 8})
+  (bench (array-map 1 2 3 4 5 :asd "123" 6 7 8))
+  (bench (hash-map 1 2 3 4 5 :asd "123" 6 7 8))
+  (bench (t/hash-map 1 2 3 4 5 :asd "123" 6 7 8))
+
+  (defn fast-vector
+    ([] [])
+    ([a] [a])
+    ([a b] [a b])
+    ([a b c] [a b c])
+    ([a b c d] [a b c d])
+    ([a b c d e] [a b c d e])
+    ([a b c d e f] [a b c d e f])
+    ([a b c d e f & args]
+     (. clojure.lang.LazilyPersistentVector (create (into [a b c d e f] args)))))
+  (bench (fast-vector 1 2 3 4 5 :asd "123" 6 7 8))
+  )
