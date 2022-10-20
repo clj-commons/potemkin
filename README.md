@@ -101,6 +101,17 @@ This abstract type may be used within the body of `deftype+`, which is just like
   (next [_] (CustomSeq. (next s))))
 ```
 
+### `defprotocol+`
+
+A drop in replacement for `defprotocol` that is more REPL-friendly.
+
+A protocol created with Clojure's `defprotocol` always creates new instance at load time.
+If a protocol is reloaded, a `defrecord` in another namespace that is referencing the procotol will not automatically be updated to the new protocol instance.
+
+One telltale symptom of this disconnect can be a `No implementation of method` exception when calling record methods.
+
+Potemkin's `defprotocol+` improves the REPL experience by only creating a new instance of a protocol if the procotol body has changed.
+
 ### `definterface+`
 
 Every method on a type must be defined within a protocol or an interface.  The standard practice is to use `defprotocol`, but this imposes a certain overhead in both [time and memory](https://gist.github.com/ztellman/5603216).  Furthermore, protocols don't support primitive arguments.  If you need the extensibility of protocols, then there isn't another option, but often interfaces suffice.
