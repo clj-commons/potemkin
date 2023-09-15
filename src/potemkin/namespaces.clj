@@ -26,11 +26,11 @@
          (throw (IllegalArgumentException.
                   (str "Calling import-fn on a macro: " sym))))
 
-       `(do
-          (def ~(with-meta n {:protocol protocol}) (deref ~vr))
-          (alter-meta! (var ~n) merge (dissoc (meta ~vr) :name))
-          (link-vars ~vr (var ~n))
-          ~vr))))
+       `(let [vr# (resolve '~sym)]
+          (def ~(with-meta n {:protocol protocol}) (deref vr#))
+          (alter-meta! (var ~n) merge (dissoc (meta vr#) :name))
+          (link-vars vr# (var ~n))
+          vr#))))
 
 (defmacro import-macro
   "Given a macro in another namespace, defines a macro with the same
@@ -48,12 +48,12 @@
        (when-not (:macro m)
          (throw (IllegalArgumentException.
                   (str "Calling import-macro on a non-macro: " sym))))
-       `(do
-          (def ~n ~(resolve sym))
-          (alter-meta! (var ~n) merge (dissoc (meta ~vr) :name))
+       `(let [vr# (resolve '~sym)]
+          (def ~n (deref vr#))
+          (alter-meta! (var ~n) merge (dissoc (meta vr#) :name))
           (.setMacro (var ~n))
-          (link-vars ~vr (var ~n))
-          ~vr))))
+          (link-vars vr# (var ~n))
+          vr#))))
 
 (defmacro import-def
   "Given a regular def'd var from another namespace, defined a new var with the
@@ -68,11 +68,11 @@
            nspace (:ns m)]
        (when-not vr
          (throw (IllegalArgumentException. (str "Don't recognize " sym))))
-       `(do
-          (def ~n @~vr)
-          (alter-meta! (var ~n) merge (dissoc (meta ~vr) :name))
-          (link-vars ~vr (var ~n))
-          ~vr))))
+       `(let [vr# (resolve '~sym)]
+          (def ~n (deref vr#))
+          (alter-meta! (var ~n) merge (dissoc (meta vr#) :name))
+          (link-vars vr# (var ~n))
+          vr#))))
 
 (defmacro import-vars
   "Imports a list of vars from other namespaces."
