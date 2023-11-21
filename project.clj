@@ -4,8 +4,7 @@
   :deploy-repositories [["clojars" {:url "https://repo.clojars.org"
                                     :sign-releases false}]]
 
-  :dependencies [[clj-tuple "0.2.2"]
-                 [riddley "0.1.12"]]
+  :dependencies [[riddley "0.1.12"]]
   :profiles {:dev {:dependencies [[criterium "0.4.6"]
                                   [collection-check "0.1.6"]]}
              :provided {:dependencies [[org.clojure/clojure "1.11.1"]]}}

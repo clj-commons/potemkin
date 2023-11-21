@@ -1,7 +1,6 @@
 (ns potemkin.utils
   (:require
-    [potemkin.macros :refer [unify-gensyms]]
-    [clj-tuple :as t])
+    [potemkin.macros :refer [unify-gensyms]])
   (:import
     [java.util.concurrent
      ConcurrentHashMap]))
@@ -101,7 +100,7 @@
      (if (nil? x#) ::nil x#)))
 
 (defmacro ^:no-doc memoize-form [m f & args]
-  `(let [k# (t/vector ~@args)]
+  `(let [k# [~@args]]
      (let [v# (.get ~m k#)]
        (if-not (nil? v#)
          (re-nil v#)
