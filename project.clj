@@ -1,4 +1,4 @@
-(defproject potemkin "0.4.6"
+(defproject potemkin "0.4.7"
   :license {:name "MIT License"}
   :description "Some useful facades."
   :deploy-repositories [["clojars" {:url "https://repo.clojars.org"
