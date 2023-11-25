@@ -20,3 +20,6 @@
   x)
 
 (def some-value 1)
+
+(defn ^clojure.lang.ExceptionInfo ex-info-2 [msg data]
+  (ex-info msg data))
