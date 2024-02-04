@@ -8,12 +8,12 @@ Potemkin is a collection of facades and workarounds for things that are more dif
 
 ##### Leiningen
 ```clojure
-[potemkin "0.4.6"]
+[potemkin "0.4.7"]
 ```
 
 ##### deps.edn
 ```clojure
-potemkin/potemkin {:mvn/version "0.4.6"}
+potemkin/potemkin {:mvn/version "0.4.7"}
 ```
 
 ### `import-vars`
