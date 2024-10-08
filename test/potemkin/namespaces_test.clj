@@ -13,6 +13,10 @@
 (import-fn i/protocol-function)
 (import-fn i/inlined-fn)
 (import-def i/some-value)
+(import-vars [potemkin.imports-test
+              [multi-arity-macro :as renamed-multi-arity-macro]
+              [multi-arity-fn :as renamed-multi-arity-fn]
+              [some-value :as renamed-some-value]])
 
 
 (defn drop-lines [n s]
@@ -50,3 +54,10 @@
     (is false "`import-vars` should have thrown an exception")
   (catch Exception ex
     (is "`clojure.set/onion-misspelled` does not exist" (.getMessage ex)))))
+
+(deftest import-vars-allows-renaming
+  (is (= 1 renamed-some-value))
+  (is (out= (source i/multi-arity-fn) (source renamed-multi-arity-fn)))
+  (is (rest-out= (doc i/multi-arity-fn) (doc renamed-multi-arity-fn)))
+  (is (out= (source i/multi-arity-macro) (source renamed-multi-arity-macro)))
+  (is (rest-out= (doc i/multi-arity-macro) (doc renamed-multi-arity-macro))))

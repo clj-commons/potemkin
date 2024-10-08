@@ -27,7 +27,7 @@ The former approach places an onus on the creator of the library; the various or
 ```clojure
 (import-vars
   [clojure.walk
-    prewalk
+    [prewalk :as walk-pre]
     postwalk]
   [clojure.data
     diff])

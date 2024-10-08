@@ -78,26 +78,33 @@
   "Imports a list of vars from other namespaces."
   [& syms]
   (let [unravel (fn unravel [x]
-                  (if (sequential? x)
+                  (cond
+                    (and (vector? x) (#{:as} (second x)))
+                    [(with-meta (first x) {:name (nth x 2)})]
+
+                    (sequential? x)
                     (->> x
                          rest
                          (mapcat unravel)
                          (map
-                          #(symbol
-                            (str (first x)
-                                 (when-let [n (namespace %)]
-                                   (str "." n)))
-                            (name %))))
-                    [x]))
+                          #(with-meta (symbol
+                                       (str (first x)
+                                            (when-let [n (namespace %)]
+                                              (str "." n)))
+                                       (name %))
+                             (meta %))))
+
+                    :else [x]))
         syms (mapcat unravel syms)]
     `(do
        ~@(map
           (fn [sym]
             (let [vr (resolve sym)
-                  m (meta vr)]
+                  m (meta vr)
+                  ?name (-> sym meta :name)]
               (cond
-               (nil? vr) `(throw (ex-info (format "`%s` does not exist" '~sym) {}))
-               (:macro m) `(import-macro ~sym)
-               (:arglists m) `(import-fn ~sym)
-               :else `(import-def ~sym))))
+                (nil? vr) `(throw (ex-info (format "`%s` does not exist" '~sym) {}))
+                (:macro m) `(import-macro ~sym ~?name)
+                (:arglists m) `(import-fn ~sym ~?name)
+                :else `(import-def ~sym ~?name))))
           syms))))
