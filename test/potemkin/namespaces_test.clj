@@ -50,3 +50,6 @@
     (is false "`import-vars` should have thrown an exception")
   (catch Exception ex
     (is "`clojure.set/onion-misspelled` does not exist" (.getMessage ex)))))
+
+;; This is the whole test for CLJ-1929
+(import-vars [potemkin.imports-test ex-info-2])
