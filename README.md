@@ -33,6 +33,20 @@ The former approach places an onus on the creator of the library; the various or
     diff])
 ```
 
+`import-vars` supports the `require` syntax of Clojure:
+
+```clojure
+(import-vars
+  [clojure.walk :refer [prewalk postwalk]])
+```
+
+Renaming is also supported with the `require` syntax:
+
+```clojure
+(import-vars
+  [clojure.walk :refer [prewalk postwalk] :rename {prewalk pre-walk}])
+```
+
 ### `def-map-type`
 
 A Clojure map implements the following interfaces: `clojure.lang.IPersistentCollection`, `clojure.lang.IPersistentMap`, `clojure.lang.Counted`, `clojure.lang.Seqable`, `clojure.lang.ILookup`, `clojure.lang.Associative`, `clojure.lang.IObj`, `java.lang.Object`, `java.util.Map`, `java.util.concurrent.Callable`, `java.lang.Runnable`, and `clojure.lang.IFn`.  Between them, there's a few dozen functions, many with overlapping functionality, all of which need to be correctly implemented.
