@@ -23,3 +23,7 @@
 
 (defn ^clojure.lang.ExceptionInfo ex-info-2 [msg data]
   (ex-info msg data))
+
+(def some-other-value 2)
+
+(defn some-other-fn [] 1)

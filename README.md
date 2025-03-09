@@ -33,6 +33,20 @@ The former approach places an onus on the creator of the library; the various or
     diff])
 ```
 
+`import-vars` supports the `require` syntax of Clojure:
+
+```clojure
+(import-vars
+  [clojure.walk :refer [prewalk postwalk]])
+```
+
+Renaming is also supported with the `require` syntax:
+
+```clojure
+(import-vars
+  [clojure.walk :refer [prewalk postwalk] :rename {prewalk pre-walk}])
+```
+
 ### `def-map-type`
 
 A Clojure map implements the following interfaces: `clojure.lang.IPersistentCollection`, `clojure.lang.IPersistentMap`, `clojure.lang.Counted`, `clojure.lang.Seqable`, `clojure.lang.ILookup`, `clojure.lang.Associative`, `clojure.lang.IObj`, `java.lang.Object`, `java.util.Map`, `java.util.concurrent.Callable`, `java.lang.Runnable`, and `clojure.lang.IFn`.  Between them, there's a few dozen functions, many with overlapping functionality, all of which need to be correctly implemented.
@@ -106,11 +120,11 @@ This abstract type may be used within the body of `deftype+`, which is just like
 A drop in replacement for `defprotocol` that is more REPL-friendly.
 
 A protocol created with Clojure's `defprotocol` always creates new instance at load time.
-If a protocol is reloaded, a `defrecord` in another namespace that is referencing the procotol will not automatically be updated to the new protocol instance.
+If a protocol is reloaded, a `defrecord` in another namespace that is referencing the protocol will not automatically be updated to the new protocol instance.
 
 One telltale symptom of this disconnect can be a `No implementation of method` exception when calling record methods.
 
-Potemkin's `defprotocol+` improves the REPL experience by only creating a new instance of a protocol if the procotol body has changed.
+Potemkin's `defprotocol+` improves the REPL experience by only creating a new instance of a protocol if the protocol body has changed.
 
 ### `definterface+`
 
