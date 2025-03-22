@@ -298,9 +298,9 @@
                  (fn [[name f]]
                    (list name `[_#] f))))
 
-           (~'meta [_] meta##)
+           (~'meta [~'_] meta##)
 
-           (~'with-meta [_ x#]
+           (~'with-meta [~'_ x#]
              (new ~name ~@params key-set## added## x#))
 
            (~'get [this## key# default-value#]
