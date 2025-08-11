@@ -35,10 +35,7 @@
 
    def-abstract-type
    reify+
-   defprotocol+
    deftype+
-   defrecord+
-   definterface+
    extend-protocol+]
 
   [potemkin.collections
