@@ -169,16 +169,6 @@
      ~(with-meta name {:tag :potemkin/abstract-type})
      '(deftype ~name [] ~@body)))
 
-(defmacro defprotocol+
-  "A protocol that won't evaluate if an equivalent protocol with the same name already exists."
-  [name & body]
-  (let [prev-body (-> name resolve meta :potemkin/body)]
-    (when (or (not (equivalent? prev-body body))
-              (-> name resolve nil?))
-      `(let [p# (defprotocol ~name ~@body)]
-         (alter-meta! (resolve p#) assoc :potemkin/body '~(r/macroexpand-all body))
-         p#))))
-
 ;;;
 
 (def clojure-fn-subs
@@ -289,27 +279,19 @@
 (defonce type-bodies (atom {}))
 
 (defmacro deftype+
-  "A deftype that won't evaluate if an equivalent type with the same name already exists,
-   and allows abstract types to be used."
+  "A deftype that allows abstract types to be used."
   [name params & body]
   (let [body (->> (list* 'deftype name params 'potemkin.types.PotemkinType body)
                   clean-deftype
                   expand-deftype
                   deftype*->deftype)
 
-        classname (with-meta (symbol (str (namespace-munge *ns*) "." name)) (meta name))
+        classname (with-meta (symbol (str (namespace-munge *ns*) "." name)) (meta name))]
 
-        prev-body (when (class? (ns-resolve *ns* name))
-                    (@type-bodies classname))]
+    (swap! type-bodies assoc classname
+           (r/macroexpand-all body))
 
-    (when-not (and prev-body
-                   (equivalent?
-                     (transform-deftype* identity prev-body)
-                     (transform-deftype* identity body)))
-      (swap! type-bodies assoc classname
-             (r/macroexpand-all body))
-
-      body)))
+    body))
 
 (defmacro reify+
   "A reify that supports abstract types."
