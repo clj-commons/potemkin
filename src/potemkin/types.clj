@@ -204,76 +204,6 @@
 (defn untag [n]
   (with-meta n (dissoc (meta n) :tag)))
 
-(defmacro definterface+
-  "An interface that won't evaluate if an interface with that name already exists.
-
-   Self parameters and multiple arities are defined like defprotocol, as well as wrapping
-   functions for each, so it can be used to replace defprotocol seamlessly."
-  [name & body]
-
-  (let [fn-names (map first body)
-        unrolled-body (mapcat
-                        (fn [[fn-name & arg-lists+doc-string]]
-                          (let [arg-lists (remove string? arg-lists+doc-string)]
-                            (map
-                              #(list
-                                 (with-meta
-                                   (munge-fn-name fn-name)
-                                   {:tag (-> % resolve-tag meta :tag)})
-                                 (resolve-tag
-                                   (vec (map resolve-tag (rest %)))))
-                              arg-lists)))
-                        body)
-        class-name (str/replace (str *ns* "." name) #"\-" "_")]
-
-    `(let [p# ~(if (try
-                     (Class/forName class-name)
-                     true
-                     (catch Exception _
-                       false))
-
-                 ;; already exists, just re-import it
-                 `(do
-                    (import ~(symbol class-name))
-                    nil)
-
-                 ;; define the interface
-                 `(definterface
-                    ~name
-                    ~@unrolled-body))]
-
-       ~@(map
-           (fn [[fn-name & arg-lists+doc-string]]
-             (let [arg-lists (remove string? arg-lists+doc-string)
-                   doc-string (filter string? arg-lists+doc-string)
-                   form-fn `(fn
-                              ~@(map
-                                  (fn [args]
-                                    (let [args (map untag args)]
-                                      `(
-                                        ;; args
-                                        ~(vec args)
-
-                                        (with-meta
-                                          (list
-                                            '~(symbol (str "." (munge-fn-name fn-name)))
-                                            (with-meta (r/macroexpand ~(first args)) {:tag ~class-name})
-                                            ~@(rest args))
-                                          {:tag ~(-> args meta :tag)}))))
-                                  arg-lists))]
-
-               (unify-gensyms
-                 `(defn ~fn-name
-                    ~@doc-string
-                    {:inline ~form-fn}
-                    ~@(let [f (eval form-fn)]
-                        (map
-                          #(list (resolve-tag %) (apply f (map untag %)))
-                          arg-lists))))))
-           body)
-
-       p#)))
-
 ;;;
 
 (defonce type-bodies (atom {}))
@@ -302,23 +232,3 @@
                deftype*->deftype)]
 
     `(reify ~@(->> body (drop 3) (remove #{'clojure.lang.IObj clojure.lang.IObj})))))
-
-;;;
-
-(defmacro defrecord+
-  "A defrecord that won't evaluate if an equivalent datatype with the same name already exists."
-  [name & body]
-  (let [classname (with-meta (symbol (str (namespace-munge *ns*) "." name)) (meta name))
-
-        prev-body (when (class? (ns-resolve *ns* name))
-                    (@type-bodies classname))
-        body' (list* 'deftype name body)]
-
-    (when-not (and prev-body
-                (equivalent?
-                  body'
-                  prev-body))
-
-      (swap! type-bodies assoc classname (r/macroexpand-all body'))
-
-      `(defrecord ~name ~@body))))

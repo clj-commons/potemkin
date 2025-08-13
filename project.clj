@@ -15,4 +15,7 @@
                    :all (constantly true)}
   :java-source-paths ["src"]
   :javac-options ["-source" "1.8" "-target" "1.8"]
-  :repositories {"sonatype-oss-public" "https://oss.sonatype.org/content/groups/public/"})
+  :repositories {"sonatype-oss-public" "https://oss.sonatype.org/content/groups/public/"
+                 "griffin.maven-banksy" {:url "https://griffin-852583658123.d.codeartifact.us-east-1.amazonaws.com/maven/maven-banksy/"
+                                         :username "aws"
+                                         :password :env/CODEARTIFACT_AUTH_TOKEN}})
