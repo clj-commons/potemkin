@@ -43,7 +43,7 @@
                 ~(throw-arity n)))
            (range 0 21))
 
-       (applyTo [this## args##]
+       (~'applyTo [this## args##]
          (let [cnt# (count args##)]
            (case cnt#
              ~@(mapcat
